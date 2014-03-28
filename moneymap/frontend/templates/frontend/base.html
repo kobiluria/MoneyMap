@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="{% block html_lang %}en{% endblock html_lang %}" {% block html_attrs %}{% endblock html_attrs %}>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vendor/bootstrap/dist/css/bootstrap.css') }}" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}" />
+        {% block head_css %}{% endblock head_css %}
+        <script src="{{ url_for('static', filename='vendor/jquery/dist/jquery.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+        {% block head_js %}{% endblock head_js %}
+    </head>
+    <body id="{% block body_id %}{% endblock body_id %}" class="{% block body_classes %}{% endblock body_classes %}" {% block body_attrs %}{% endblock body_attrs %}>
+        {% block body %}<section id="content" class="container">{% block content %}{% endblock content %}</section>{% endblock body %}
+    </body>
+</html>

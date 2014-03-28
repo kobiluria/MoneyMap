@@ -1,0 +1,10 @@
+ipython
+ipdb
+fabric
+flask
+requests
+redis
+celery
+mongoengine
+flask-mongoengine
+flask-script
