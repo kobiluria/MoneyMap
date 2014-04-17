@@ -1,7 +1,7 @@
 var AppRouter = Backbone.Router.extend({
 
     routes: {
-        ""                  : "home",
+        "": "home",
         "entities": "list",
         "entities/page/:page"	: "list",
         "entities/add"         : "addEntity",
@@ -24,7 +24,7 @@ var AppRouter = Backbone.Router.extend({
 
 	list: function(page) {
         var p = page ? parseInt(page, 10) : 1;
-        var entityList = new EntityCollection();
+        var entityList = new EntitiesCollection();
         entityList.fetch({success: function(){
             $("#content").html(new EntityListView({model: entityList, page: p}).el);
         }});

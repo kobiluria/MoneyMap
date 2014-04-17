@@ -65,8 +65,8 @@ legend {
 .home-hero {
     font-family: "Andika";
     font-size: 36;
-    color: white;
-    background-image: url('img/bg.jpg');
+    color: rgb(65, 34, 34);
+    background-image: url('img/moneyMap.png');
     background-size: cover;
     background-repeat: no-repeat;
     margin-top: -19px;

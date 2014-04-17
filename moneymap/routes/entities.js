@@ -20,10 +20,14 @@ db.open(function(err, db) {
 });
 
 exports.findById = function(req, res) {
-    var id = req.params.id;
+    var id = req.params.id;	
     console.log('Retrieving entity: ' + id);
     db.collection('entites', function(err, collection) {
-        collection.findOne({'_id':new BSON.ObjectID(id)}, function(err, item) {
+    item = collection.findOne({'_id':parseInt(id)}, function(err, item) {
+        	if(!item){
+        		console.log("none");
+        	}
+        	console.log(item);
             res.send(item);
         });
     });
@@ -99,7 +103,8 @@ var populateDB = function() {
         country: "France",
         region: "Southern Rhone",
         description: "The aromas of fruit and spice give one a hint of the light drinkability of this lovely wine, which makes an excellent complement to fish dishes.",
-        picture: "saint_cosme.jpg"
+        picture: "saint_cosme.jpg",
+        _id:1
     },
     {
         name: "LAN RIOJA CRIANZA",
