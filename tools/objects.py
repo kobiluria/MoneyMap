@@ -54,8 +54,14 @@ class entity:
         """
         self.geojson = feature
 
+    def get_code(self):
+        """
+        return the code of this entity.
+        """
+        return self.code
 
     def add_polygon(self,polygon):
+
         self.polygon = polygon
 
     def __init__(self, api_result):

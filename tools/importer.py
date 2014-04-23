@@ -10,10 +10,12 @@
 __author__ = 'kobi_luria'
 
 import requests
-import json
 import objects
 import tools
+import pymongo
+import json
 import pickle
+
 
 ################## END_POINTS  #################################:
 
@@ -26,6 +28,14 @@ ENTITIES = 'entities/'
 #################################################################
 
 
+# establish a connection to the database
+# note this uses the now deprecated Connection class, as we did in the lecture.
+# MongoClient is the preferred way of connecting.
+connection = pymongo.Connection("mongodb://localhost", safe=True)
+
+# get a handle to the school database
+db = connection.entitydb
+entities = db.entities
 
 
 def get_geojson_for_muni(search_string):
@@ -101,6 +111,16 @@ def get_district_and_muni(url, entity_list):
         entity = objects.entity(result)
         if get_entity_polygon(entity):
             entity_list['found'].append(entity)  # if found add to the entity list
+            # add it to the mongodb :
+            #TODO check for an update or an insert , if update add a timestap
+
+            succses = entities.findOne({'code':entity.code , 'polygon':entity.polygon},{entity.get_json})
+            if(succses):
+                continue
+            else:
+                entities.insert
+
+
         else:
             entity_list['not_found'].append(entity)
     if next_page:
@@ -109,6 +129,8 @@ def get_district_and_muni(url, entity_list):
 
 
 ###############################        driver :    ####################################
+
+
 
 
 # this creates a list of found and unfound entitys in the open street database.
