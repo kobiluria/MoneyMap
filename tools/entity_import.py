@@ -17,5 +17,11 @@ entities = db.entities
 
 cursor = entities.find()
 for item in cursor:
-    entities.remove(item)
-    entities.insert({'_id':'23.08.2013.'+item['code'],'code':item['code'],'coordinates':item['coordinates'],'name_en':item['name_en']})
+    #entities.remove(item)
+    print item['code']
+    if item['code'] == '':
+        entities.remove(item)
+        continue
+    code = entities.insert({'_id':'23.08.2013.'+item['code'].lstrip('0'),'code':int(item['code'].lstrip('0')),'coordinates':item['coordinates'],'name_en':item['name_en']})
+    if code:
+        entities.remove(item)
