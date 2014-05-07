@@ -22,6 +22,7 @@ for item in cursor:
     if item['code'] == '':
         entities.remove(item)
         continue
-    code = entities.insert({'_id':'23.08.2013.'+item['code'].lstrip('0'),'code':int(item['code'].lstrip('0')),'coordinates':item['coordinates'],'name_en':item['name_en']})
-    if code:
+#TODO we need to remove duplicets
+    else:
         entities.remove(item)
+        code = entities.insert({'code':int(item['code'].lstrip('0')),'coordinates':item['coordinates'],'name_en':item['name_en']})

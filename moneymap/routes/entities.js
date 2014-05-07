@@ -65,7 +65,7 @@ exports.updateEntity = function(req, res) {
     db.collection('entities', function(err, collection) {
         collection.update({'_id':new BSON.ObjectID(id)}, entity, {safe:true}, function(err, result) {
             if (err) {
-                console.log('Error updating entites: ' + err);
+                console.log('Error updating entities: ' + err);
                 res.send({'error':'An error has occurred'});
             } else {
                 console.log('' + result + ' document(s) updated');
