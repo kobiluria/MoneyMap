@@ -1,23 +1,32 @@
+// server.js
+
+
+//=================
+// SETUP
+//=================
+
 var express = require('express'),
-    path = require('path'),
-    http = require('http'),
-    entity = require('./routes/entities');
+    logger = require('morgan'),
+    bodyParser = require('body-parser');
 
-var app = express();
+var app = express(); // configure the app using express!!
+app.use(logger()); 
+app.use(bodyParser());
+//app.use(express.static(path.join(__dirname, 'public')));
+var port = process.env.PORT || 3000;
+var router = express.Router();
 
-app.configure(function () {
-    app.set('port', process.env.PORT || 3000);
-    app.use(express.logger('dev')); /* 'default', 'short', 'tiny', 'dev' */
-    app.use(express.bodyParser()),
-    app.use(express.static(path.join(__dirname, 'public')));
+
+router.get('/',function(req,res) {
+	res.json({message:'Welcome to Money Map API'});
 });
 
-app.get('/entities', entity.findAll);
-app.get('/entities/:id', entity.findById);
-app.post('/entities', entity.addEntity);
-app.put('/entities/:id', entity.updateEntity);
-app.delete('/entities/:id', entity.deleteEntity);
-
-http.createServer(app).listen(app.get('port'), function () {
-    console.log("Express server listening on port " + app.get('port'));
+router.get('/:type(kobi)/:id',function(req,res){
+	console.log('id = ' + req.params.id);
+	res.json({message:req.params.type});
 });
+
+app.use('/api',router);
+
+app.listen(port);
+console.log('API is listening on port :' + port);
