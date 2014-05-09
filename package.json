@@ -1,0 +1,24 @@
+{
+
+"name": "MoneyMap",
+
+"description": "a Map API for Budgets",
+
+"version": "0.0.1",
+
+"main": "server.js",
+
+"private": true,
+
+"dependencies": {
+        "express": "~4.x",
+        "mongodb": "1.1.8",
+        "body-parser": "~1.x",
+        "morgan" : ""
+},
+
+"engines": {
+        "node": "0.8.4",
+        "npm": "1.1.49"
+    }
+}
