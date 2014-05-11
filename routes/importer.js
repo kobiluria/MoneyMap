@@ -1,26 +1,6 @@
 var needle = require('needle');
-var mongodb = require('mongodb');
-
-/*********************************************************
-* Intialize the Mongo server for the import
-**********************************************************/
-var Server = mongo.Server,
-    Db = mongo.Db,
-    BSON = mongo.BSONPure;
-
-var server = new Server('localhost', 27017, {auto_reconnect: true});
-db = new Db('entitydb', server, {safe: true});
-
-db.open(function(err, db) {
-    if(!err) {
-        console.log("Connected to 'entitydb' database");
-        db.collection('entities', {safe:true}, function(err, collection) {
-            if (err) {
-                console.log("The 'entities' collection doesn't exist");
-            }
-        });
-    }
-});
+var MongoClient = require('mongodb').MongoClient;
+var async = require('async');
 
 
 /**********************************************************
@@ -31,26 +11,95 @@ db.open(function(err, db) {
 ***********************************************************/
 //TODO add each entity from the results of the api to the mongo database. 
 
-exports.importAll = function(req,res,error){
-	needle.get('http://ext.openmuni.org.il/v1/entities/', function(error,response){
-		
-		if (error){ // Bad connection to the open muni API. 
-			return error;
-		}
+exports.importAll = function(err,req,res){
 
-		var results = response.body.results;
-		for (var i = results.length - 1; i >= 0; i--) {
-			mongoDoc = buildMongoDocument(results[i]);
+	async.auto({
+	
+		get_db : MongoClient.connect("mongodb://localhost:27017/entitydb"),
 
-			db.entities.insert(mongodoc);
+		get_collection : ['get_db' , function( callback ,  results){
+			var collection = results.db.collection('entities');
+			callback(null,collection);
+		}],
 
-			
-			//TODO query open street map here!
-			//TODO if the polygon data is the same this loop should continue
+		get_api : needle.get('http://ext.openmuni.org.il/v1/entities/'),
 
-		};
+
+		update_data : ['get_collection','get_api' , update_data(callback , results)] ,
+
+
+	},function(err,results){
+	
+	if(err){
+		console.dir(err); //  if an error happend
+	}
+
+	else{
+		res.send('update was successful')
+	}
+	
 	});
+
 }
+
+
+/**********************************************************
+* Given the Collection and the Open Muni Database 
+* Start intializing the collection
+***********************************************************/
+
+//TODO add each entity from the results of the api to the mongo database. 
+intialize_data = function(callback,results){
+	
+	var api_results = results.get_api.body.results;
+
+	for( var i = 0 ; i < api_result.length ; i ++){ // loop through all results
+		
+		var api_result = api_results[i];
+		
+		needle.get('nominatim.openstreetmap.org/search?' , function(err , osm_result){
+
+			var doc = buildMongoDocument(api_result,osm_result);
+
+			results.get_collection.insert(doc);
+
+		});
+
+		setTimeout(function() {}, 500);
+
+	}
+
+	callback(null); // no errors
+}
+
+/**********************************************************
+* Given the Collection and the Open Muni Database 
+* Start updating the collection
+***********************************************************/
+update_data = function(callback,results){
+	
+	var results = results.get_api.body.results;
+
+	for( var i = 0 ; i < results.length ; i ++){ // loop through all results
+		
+		var result = api_result[i];
+		
+		var curser = collection.find({id : result.id , update_date : { }} ,{ id:1 , geojson:1 , entry_date:1 , update_date:1 })
+		.sort(entry_date: 1).limit(1);
+		
+		curser.each(function(err,item){
+			if(item != null){
+					if (item.)
+					if (item.geojson = ) //TODO fix this to actually compare between them. 
+			}
+		needle.get('nominatim.openstreetmap.org/search?' , function(err , osm_response){
+
+
+		})
+
+	}
+}
+
 
 /**********************************************************
 * A function for importing/updating one entity
@@ -68,11 +117,12 @@ exports.importMuni = function(req,res,muniCode){
 	});
 }
 
+
 /**********************************************************
 * A function for building the mongodoc for each polygon
 * in the system
 ***********************************************************/
-exports.buildMongoDocument = function(result){
+exports.buildMongoDocument = function(api_result,osm_result){
 	var doc = {
 		
 		code :
