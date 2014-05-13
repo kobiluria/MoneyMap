@@ -1,46 +1,67 @@
-var needle = require('needle');
+var unirest = require('unirest');
 var MongoClient = require('mongodb').MongoClient;
-var async = require('async');
 
-
-/**********************************************************
-* A function for importing/updating all entities
+/************************************************************************
+* A function for importing all entities
 * in the open muni database into the
 * Polygon database.
-* This function should be called every month give or take
-***********************************************************/
+* This function should be called once in the intial build of the database
+*************************************************************************/
 //TODO add each entity from the results of the api to the mongo database. 
 
-exports.importAll = function(err,req,res){
+exports.intailizeAll = function(err,req,res){
 
-	async.auto({
-	
-		get_db : MongoClient.connect("mongodb://localhost:27017/entitydb"),
+	MongoClient.connect("mongodb://localhost:27017/entitydb"), get_collection(err, db){ // get DB
+		var collection = results.db.collection('entities'); // get Collection
+		unirest.get('http://ext.openmuni.org.il/v1/entities/').end(function(api_response){
+			var api_results = api_response.body.results;
+			for( var i = 0 ; i < api_result.length ; i ++){ // loop through all results
+				setTimeout(get_entity = function () {			
+					var api_result = api_results[i];
 
-		get_collection : ['get_db' , function( callback ,  results){
-			var collection = results.db.collection('entities');
-			callback(null,collection);
-		}],
+					var osm_query = {
+						city : api_result.name ,
+						country : 'Israel' ,
+						format : json,
+						addressdetails : 1 ,
+						polygon_geojson : 1 ,
+						limit : 3
+					}
 
-		get_api : needle.get('http://ext.openmuni.org.il/v1/entities/'),
+					var query_str = Object.keys(osm_query).map(function(key){ 
+  						return encodeURIComponent(key) + '=' + encodeURIComponent(osm_query[key]); 
+  					}).join('&');
 
 
-		update_data : ['get_collection','get_api' , update_data(callback , results)] ,
+					unirest.get('http://nominatim.openstreetmap.org/search?'+query_str).end(function(osm_response){
+						for(var i = 0 ; i < osm_response.length ; i++){
+							if(osm_response.osm_type != 'relation'){
+								continue;
+							}
+							else if 
+						}
 
 
-	},function(err,results){
-	
-	if(err){
-		console.dir(err); //  if an error happend
-	}
-
-	else{
-		res.send('update was successful')
-	}
-	
+						var doc = {
+							
+							omuni_id : api_result.id,
+							muni_code : api_result.code
+							date_obtained :
+							date_updated :
+							geojson :
+							osm_id :
+							place_id : 
+							license :
+						}
+						collection.insert(doc);
+					});
+				});
+			}
+		});
 	});
-
 }
+
+
 
 
 /**********************************************************
@@ -49,27 +70,25 @@ exports.importAll = function(err,req,res){
 ***********************************************************/
 
 //TODO add each entity from the results of the api to the mongo database. 
-intialize_data = function(callback,results){
+intialize_data = function(err,api_results,collection,res){
 	
-	var api_results = results.get_api.body.results;
+	var api_results = api_results.body.results;
 
 	for( var i = 0 ; i < api_result.length ; i ++){ // loop through all results
+		setTimeout(get_entity() {
+			
+			var api_result = api_results[i];
 		
-		var api_result = api_results[i];
-		
-		needle.get('nominatim.openstreetmap.org/search?' , function(err , osm_result){
+			needle.get('nominatim.openstreetmap.org/search?' , call_osm (err , osm_results){
 
-			var doc = buildMongoDocument(api_result,osm_result);
+				// for each results find the best result. 
 
-			results.get_collection.insert(doc);
+				var doc = buildMongoDocument(api_result,osm_result);
 
-		});
-
-		setTimeout(function() {}, 500);
-
+				collection.insert(doc);
+			});
+		}, 500);
 	}
-
-	callback(null); // no errors
 }
 
 /**********************************************************
@@ -77,21 +96,18 @@ intialize_data = function(callback,results){
 * Start updating the collection
 ***********************************************************/
 update_data = function(callback,results){
-	
-	var results = results.get_api.body.results;
 
-	for( var i = 0 ; i < results.length ; i ++){ // loop through all results
-		
-		var result = api_result[i];
-		
-		var curser = collection.find({id : result.id , update_date : { }} ,{ id:1 , geojson:1 , entry_date:1 , update_date:1 })
+	MongoClient.connect("mongodb://localhost:27017/entitydb"), get_collection(err, db){
+		var collection = results.db.collection('entities');
+		// find all the entites that need to updated
+		var curser = collection.find({id : result.id , updade_date:$gte:{} }} ,{ id:1 , geojson:1 , entry_date:1 , update_date:1 })
 		.sort(entry_date: 1).limit(1);
 		
 		curser.each(function(err,item){
 			if(item != null){
-					if (item.)
-					if (item.geojson = ) //TODO fix this to actually compare between them. 
+
 			}
+
 		needle.get('nominatim.openstreetmap.org/search?' , function(err , osm_response){
 
 
@@ -131,5 +147,6 @@ exports.buildMongoDocument = function(api_result,osm_result){
 
 
 	}
+	return doc;
 }
 
