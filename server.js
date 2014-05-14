@@ -6,7 +6,7 @@
 var express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
-    entities = require('./routes/entities'),
+    //entities = require('./routes/entities'),
     importer = require('./routes/importer');
 
 var app = express(); // configure the app using express!!
@@ -19,8 +19,8 @@ var router = express.Router();
 * Routing
 **************************************/
 app.use('/api',router);
-router.get('/', entities.welcome);
-router.get('/entities' , entities.findAll);
-router.get('/import',importer.import);
+router.get('/', importer.welcome);
+//router.get('/entity' , entities.findAll);
+router.get('/import',importer.initializeAll);
 app.listen(port);
 console.log('API is listening on port :' + port);
