@@ -17,7 +17,8 @@
         "morgan" : "",
         "needle":"",
         "async":"",
-        "unirest":""
+        "unirest":"",
+        "sleep":""
 },
 
 "engines": {

@@ -53,12 +53,12 @@ function get_correct_osm(osm_results){
 build_doc = function(api_result, osm_entity){
     var doc = {
         omuni_name : api_result.name,
-        osm_name : : osm_entity.display_name,
+        osm_name : osm_entity.display_name,
         omuni_id : api_result.id,
         muni_code : api_result.code,
         date_obtained : new Date(),
         date_updated : new Date(),
-        geojson : osm_entity.address.geojson,
+        geojson : osm_entity.geojson,
         osm_id : osm_entity.osm_id,
         place_id : osm_entity.place_id,
         license : osm_entity.licence
@@ -74,7 +74,7 @@ build_doc = function(api_result, osm_entity){
  * This function should be called once in the intial build of the database
  *************************************************************************/
 
-exports.initializeAll = function(err,req,res){
+initializeAll = function(){
 
     // Set up the connection to the local db
     var mongoclient = new MongoClient(new Server("localhost", 27017), {native_parser: true});
@@ -83,9 +83,9 @@ exports.initializeAll = function(err,req,res){
     mongoclient.open(function(err, mongoclient) {
 
         // Get the first db and do an update document on it
-        var db = mongoclient.db("entitydb");
+        var db = mongoclient.db("MoneyMap");
 
-        var collection = db.collection('entities2');
+        var collection = db.collection('entities');
 
         unirest.get('http://ext.openmuni.org.il/v1/entities/').end(proccess_api);
 
@@ -96,8 +96,9 @@ exports.initializeAll = function(err,req,res){
             var i = 0;
 
             function loop(){
-                if(i >  api_results.length){ return;}
+                if(i >  api_results.length) return;
 
+                console.log('****************** ' + i + ' ************* '+ api_results.length + ' *************');
                 var api_result = api_results[i];
                 var query = build_query(api_result);
                 console.log(query );
@@ -123,6 +124,7 @@ exports.initializeAll = function(err,req,res){
 
 }
 
+initializeAll();
 
 /**********************************************************
  * Given the Collection and the Open Muni Database
