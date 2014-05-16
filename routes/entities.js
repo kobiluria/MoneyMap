@@ -21,9 +21,6 @@ db.open(function(err, db) {
     }
 });
 
-exports.welcome = function(req,res){
-	res.json({message:'welcome to Money Map API'});
-}
 
 exports.findById = function(req, res) {
     var id = req.params.id;	

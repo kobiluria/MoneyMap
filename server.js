@@ -7,7 +7,8 @@ var express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     //entities = require('./routes/entities'),
-    importer = require('./routes/importer');
+    importer = require('./static/importer'),
+    basic_response = require('./routes/basic_response');
 
 var app = express(); // configure the app using express!!
 app.use(logger()); 
@@ -19,7 +20,7 @@ var router = express.Router();
 * Routing
 **************************************/
 app.use('/api',router);
-router.get('/', importer.welcome);
+router.get('/', basic_response.welcome);
 //router.get('/entity' , entities.findAll);
 router.get('/import',importer.initializeAll);
 app.listen(port);
