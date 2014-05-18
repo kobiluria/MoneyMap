@@ -13,7 +13,7 @@ var OSM = 'http://nominatim.openstreetmap.org/search?';
  * @return {String} a string representation of the Query to OSM
  * @param {JSON} api_result the open muni api result
  * ***********************************************************************/
-build_query = function(api_result) {
+build_query = function(api_result , callback) {
 
     var osm_query = {
         city: api_result.name,
@@ -28,9 +28,9 @@ build_query = function(api_result) {
         return encodeURIComponent(key) + '=' +
             encodeURIComponent(osm_query[key]);
     }).join('&');
-
-    return query_str;
-}
+    console.log('osm_query ' + query_str );
+    callback(null, query_str, api_result);
+};
 
 
 /***********************************************************************
@@ -39,13 +39,18 @@ build_query = function(api_result) {
  * @return {JSON} return the OSM result which fits best as an entity
  * polygon
  * ***********************************************************************/
-function get_correct_osm(osm_results) {
+function get_correct_osm(osm_results, api_result, callback) {
+    var found;
     for (var i = 0; i < osm_results.length; i++) {
         if (osm_results[i].osm_type == 'relation') {
-            return osm_results[i];
+            found = true;
+            console.log('correct osm ' + osm_results[i])
+            callback(null, osm_results[i], api_result);
         }
     }
-    return null;
+    if(!found){
+    callback('err', null);
+    }
 }
 
 /*************************************************************************
@@ -54,8 +59,8 @@ function get_correct_osm(osm_results) {
  * @param {JSON} osm_entity
  * @return {JSON} a complete document to be placed in the mongo database
  * *************************************************************************/
-build_doc = function(api_result, osm_entity) {
-    return {
+build_doc = function(osm_entity, api_result, callback) {
+    var doc = {
         omuni_name: api_result.name,
         osm_name: osm_entity.display_name,
         omuni_id: api_result.id,
@@ -67,8 +72,15 @@ build_doc = function(api_result, osm_entity) {
         place_id: osm_entity.place_id,
         license: osm_entity.licence
     };
+    callback(null, doc);
 }
 
+get_osm_results = function(query, api_result, callback) {
+    unirest.get(OSM + query).end(function(osm_results) {
+
+        callback(null, osm_results.body, api_result);
+    });
+}
 /************************************************************************
  * A function for importing all entities
  * in the open muni database into the
@@ -88,62 +100,51 @@ initializeAll = function() {
         // Get the first db and do an update document on it
         var db = mongoclient.db('MoneyMap');
 
-        db.collection('entities', function(err, collection) {
+        db.collection('entities2', function(err, collection) {
 
             unirest.get('http://ext.openmuni.org.il/v1/entities/')
                 .end(proccess_api);
 
             function proccess_api(api_results) {
                 var results = api_results.body.results;
-
-                function series(result, callback) {
-                    var doc = null;
-                    console.log(result.name);
-                    var query = build_query(result);
-                    console.log(OSM + query);
-                    unirest.get(OSM + query).end(insert_doc);
-
-                    function insert_doc(api) {
-                        var correct_osm = get_correct_osm(api.body);
-                        if (!correct_osm) {
-                            setTimeout(function() {
-                                console.log('couldnt find ' + result.name);
-                                callback(null);
-
-                            }, 5000);
-                        }
-                        else {
-                            console.log(correct_osm.display_name);
-                            doc = build_doc(result, correct_osm);
-                            setTimeout(callback(doc), 5000);
-                        }
-                    }
-                }
-
-                function for_loop(item) {
-
-                    if (item) {
-                        series(item, function(doc) {
-                            if (doc) {
-                                collection.insert(doc, function(err, result) {
-                                    console.log(result);
+                async.whilst(
+                    function(){ if(results.length){
+                        return true;
+                    } else
+                        return false;
+                    },
+                    function(callback_top) {
+                    var result = results.shift();
+                        console.log(result);
+                    async.waterfall([
+                        function(callback){setTimeout(callback,5000)},
+                        function(callback){callback(null,result)},
+                        build_query,
+                        get_osm_results,
+                        get_correct_osm,
+                        build_doc,
+                        function(result, callback) {
+                            collection.insert(
+                            result,function(err,mongo_result){
+                                    callback(err, mongo_result);
                                 });
-                            }
-                            return for_loop(results.shift());
+                        }
+                    ], function(err, result) {
+                        if(err){
+                            console.log(' could not find the entity'); // TODO add a err object which has info about err
+                        }
+                        else { console.log(result)}
+                        setTimeout(callback_top(),000);
 
-                        });
+                    });
+                    },function(err) {
+                        console.log('err in top level');
                     }
-                    else {
-                        console.log('done');
-                    }
-                }
-
-
-                for_loop(results.shift());
-
+                );
             }
         });
     });
 }
+
 
 initializeAll();
