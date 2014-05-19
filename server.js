@@ -7,7 +7,8 @@ var express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     //entities = require('./routes/entities'),
-    importer = require('./static/importer'),
+    //importer = require('./static/importer'),
+    admin = require('./routes/admin'),
     basic_response = require('./routes/basic_response');
 
 var app = express(); // configure the app using express!!
@@ -22,6 +23,7 @@ var router = express.Router();
 app.use('/api',router);
 router.get('/', basic_response.welcome);
 //router.get('/entity' , entities.findAll);
-router.get('/import',importer.initializeAll);
+//router.get('/import',importer.initializeAll);
+router.get('/admin/missing',admin.find_missing);
 app.listen(port);
 console.log('API is listening on port :' + port);
