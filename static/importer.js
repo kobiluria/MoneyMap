@@ -8,6 +8,7 @@ var Db = require('mongodb').Db,
 /** Const **/
 var OSM = 'http://nominatim.openstreetmap.org/search?';
 
+
 /*************************************************************************
  * Build a Query to search  document for the mongo db database.
  * @param {JSON} api_result the open muni api result

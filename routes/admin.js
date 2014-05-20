@@ -5,60 +5,95 @@ var Db = require('mongodb').Db,
     MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
     async = require('async'),
-    unirest = require('unirest');
+    unirest = require('unirest'),
+    tools = require('../static/tools');
 
+/************************************************************
+ * Find a Admin Query in our DB
+ * The Request is parased using the q= string
+ * and depending on the request we will use either an
+ * aggregation query or a loop through Open Muni Db and return
+ * some info back. This function is used for a route to the
+ * Correct function and query.
+ * @param {Request} req the clients search req.
+ * @param {Response} res the response to the client.
+ * *********************************************************/
+exports.find = function(req, res) {
+    var search = {};
+    var search_str = req.query.q;
+    console.log(search_str);
+    switch (search_str) {
+        case 'missing':
+            find_missing(search_str, resposne);
+            break;
+        case 'unupdated':
+            search = [{$match: {'date_updated': {$lte: new Date()}}}];
+            aggregate(search, resposne);
+            break;
 
-exports.find_missing = function(req, res) {
+    }
+    function resposne(result){
+        res.json({request: req.query.q, result: result});
 
-    // Set up the connection to the local db
-    var mongoclient = new MongoClient(new Server('localhost', 27017),
-        {native_parser: true});
+    }
+}
 
-    mongoclient.open(function(err, mongoclient) {
-        // Get the Money Map db
-        var db = mongoclient.db('MoneyMap');
+/**************************************************************
+ *  Find something missing in our DB
+ *  entities which exists in Open Muni
+ *  but doesn't exists in our database this function can query
+ *  a bunch of operations , all of these operations should be looped
+ *  for each entity in the open muni database.
+ * @param {String} search the clients search req.
+ * @param {Response} res the response to the client.
+ * ************************************************************/
+find_missing = function(search_str, callback) {
 
-        db.collection('entities', {} , function(err, collection) {
+    tools.get_collection('entities', function(err, collection) {
+        unirest.get(tools.OPEN_MUNI).end(function(api) {
+            var results = api.body.results;
+            var answer = [];
+            tools.loop_api(results, find_entity, send_missing);
+            function find_entity(result, callback) {
+                var search;
+                switch (search_str) {
+                    case 'missing' : search = {'omuni_id': result.id};
+                }
 
-            unirest.get('http://ext.openmuni.org.il/v1/entities/')
-                .end(function(api) {
-                    list_missing(api, collection, res);
+                collection.find(search).toArray(function(err, items) {
+
+                    if (err) { console.log(err); }
+
+                    else if (!items.length) { // did not find this in DB
+                        answer.push({code: result.code,
+                            id: result.id, name: result.name});
+                        callback();
+                    }
+                    else { // continue the loop
+                        callback();
+                    }
                 });
+            }
+
+            function send_missing(err) { // when we are done.
+                callback(answer);
+            }
+        });
+    });
+}
+/***************************************************************
+ * An aggregation search on our DB
+ * @param {Array} agg a aggregation framework array
+ * @param {Function} callback  a callback function
+ ***************************************************************/
+aggregate = function(agg, callback) {
+    // project to standerd Open Muni Api call 
+    agg.push({$project: {_id: 0, code:'$muni_code', id:'$omuni_id'}});
+    console.log(agg);
+    tools.get_collection('entities', function(err, collection) {
+        collection.aggregate(agg, function(err, result) {
+            callback(result);
         });
     });
 }
 
-list_missing = function(api, collection, res) {
-    var results = api.body.results;
-    var missing = [];
-    async.whilst(function() {
-            return results.length ? true : false;
-        },
-        function(callback_top) {
-            var result = results.shift();
-            async.waterfall([
-                function(callback) {
-                    var curser = collection.find({ omuni_id: results.id});
-                    curser.count(function(err, count) {
-                        if (count == 0) {
-                            missing.push(
-                                {code: result.code,
-                                    id: result.id,
-                                    name: result.name
-                                });
-                            callback(null);
-                        }
-                        else {
-                            callback(null);
-                        }
-                    });
-                }
-            ], function(err, result) {
-
-            });
-            callback_top();
-        }, function(err) {
-            console.log(missing);
-            res.json(missing);
-        });
-}
