@@ -18,7 +18,7 @@
         "needle":"",
         "async":"",
         "unirest":"",
-        "sleep":""
+        "jsonfile":""
 },
 
 "engines": {

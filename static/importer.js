@@ -30,6 +30,7 @@ build_query = function(api_result , callback) {
         return encodeURIComponent(key) + '=' +
             encodeURIComponent(osm_query[key]);
     }).join('&');
+    console.log(query_str);
     callback(null, query_str, api_result);
 };
 

@@ -30,9 +30,11 @@ exports.find = function(req, res) {
             search = [{$match: {'date_updated': {$lte: new Date()}}}];
             aggregate(search, resposne);
             break;
+        case 'not_muni':
+            search = [{$match: {muni_code:''}}];
 
     }
-    function resposne(result){
+    function resposne(result) {
         res.json({request: req.query.q, result: result});
 
     }
@@ -87,8 +89,8 @@ find_missing = function(search_str, callback) {
  * @param {Function} callback  a callback function
  ***************************************************************/
 aggregate = function(agg, callback) {
-    // project to standerd Open Muni Api call 
-    agg.push({$project: {_id: 0, code:'$muni_code', id:'$omuni_id'}});
+    // project to standerd Open Muni Api call
+    agg.push({$project: {_id: 0, code: '$muni_code', id: '$omuni_id'}});
     console.log(agg);
     tools.get_collection('entities', function(err, collection) {
         collection.aggregate(agg, function(err, result) {
