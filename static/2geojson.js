@@ -9,7 +9,7 @@ var tools = require('./tools');
 tools.get_collection('entities', function(err, collection) {
     collection.aggregate([{$project:
         {_id: 0,
-            'geometries': '$geojson',
+            'geometry': '$geojson',
             'properties.code': '$muni_code' }}],
         {},
         function(err, result) {
