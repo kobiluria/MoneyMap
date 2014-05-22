@@ -14,10 +14,10 @@ tools.get_collection('entities', function(err, collection) {
         {},
         function(err, result) {
             if (err) {console.log(err)}
-            for (var i; i < result.length; i++) {
+            for (var i = 0; i < result.length; i++) {
                 result[i]['type'] = 'Feature';
             }
-            var file = './map.geojson';
+            var file = '../map.geojson';
             var geojson = {type: 'FeatureCollection', features: result};
 
             jf.writeFile(file, geojson, function(err) {
