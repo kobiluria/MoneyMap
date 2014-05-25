@@ -2,6 +2,7 @@ var Db = require('mongodb').Db,
     MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
     async = require('async'),
+    tools = require('./tools'),
     unirest = require('unirest');
 
 
@@ -108,6 +109,8 @@ function proccess_api(api_results, collection) {
         },
         function(callback_top) {
             var result = results.shift();
+            // if this is not a real entity.
+            if (result.code == '') { results.shift() }
             async.waterfall([
                 function(callback) {setTimeout(callback, 2000)},
                 function(callback) {callback(null, result)},
@@ -153,6 +156,7 @@ initializeAll = function() {
         });
     });
 }
+
 
 
 initializeAll();

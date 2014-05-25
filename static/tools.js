@@ -20,8 +20,7 @@ exports.get_collection = function(name, callback) {
         var db = mongoclient.db('MoneyMap');
 
         db.collection(name, {} , function(err, collection) {
-
-            callback(err, collection) ;
+            callback(err, collection , mongoclient);
 
         });
     });
