@@ -18,7 +18,8 @@
         "needle":"",
         "async":"",
         "unirest":"",
-        "jsonfile":""
+        "jsonfile":"",
+        "jade":""
 },
 
 "engines": {
