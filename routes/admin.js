@@ -49,7 +49,7 @@ exports.find = function(req, res) {
  * @param {String} search the clients search req.
  * @param {Response} res the response to the client.
  * ************************************************************/
-find_missing = function(search_str, callback) {
+find_missing = function(search_str, callback, mongoclient) {
 
     tools.get_collection('entities', function(err, collection) {
         unirest.get(tools.OPEN_MUNI).end(function(api) {
@@ -79,6 +79,8 @@ find_missing = function(search_str, callback) {
 
             function send_missing(err) { // when we are done.
                 callback(answer);
+                mongoclient.close();
+
             }
         });
     });
@@ -90,10 +92,11 @@ find_missing = function(search_str, callback) {
  ***************************************************************/
 aggregate = function(agg, callback) {
     // project to standerd Open Muni Api call
-    agg.push({$project: {_id: 0, code: '$muni_code', id: '$omuni_id'}});
+    agg.push({$project: {_id: 0, code: '$muni_code',name:'$name', id: '$omuni_id'}});
     console.log(agg);
-    tools.get_collection('entities', function(err, collection) {
+    tools.get_collection('entities', function(err, collection, mongoclient) {
         collection.aggregate(agg, function(err, result) {
+            mongoclient.close();
             callback(result);
         });
     });
