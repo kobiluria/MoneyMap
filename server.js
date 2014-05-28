@@ -17,6 +17,7 @@ app.use(bodyParser());
 var port = process.env.PORT || 3000;
 var router = express.Router();
 var gui = express.Router();
+app.use(express.static(__dirname + '/public'))
 
 /**************************************
  * Routing and Settings API
@@ -25,14 +26,16 @@ app.use('/api', router);
 app.use('/gui',gui);
 router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
-router.get('/maps',maps.map_by_code);
+router.get('/maps/?',maps.map_by_code);
+router.get('/maps/:id',maps.map_by_id);
 
 /**************************************
  * Routing and Settings GUI
  **************************************/
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-gui.get('/', gui_route.map_by_code);
+gui.get('/?', gui_route.map_by_code);
+gui.get('/:id',gui_route.map_by_id);
 
 /***************************************
  * Start server
