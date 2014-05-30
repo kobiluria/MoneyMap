@@ -4,6 +4,7 @@
 
 
 var map;
+var dropbox;
 
 function initMap() {
     // set up the map
@@ -19,93 +20,97 @@ function loadGeoJsonString(geoString) {
 }
 
 
-
-
-
-/* DOM (drag/drop) functions */
-
-function initEvents() {
-    // set up the drag & drop events
-    var mapContainer = document.getElementById('map');
-    var dropContainer = document.getElementById('drop-container');
-
-    // first on common events
-    [mapContainer, dropContainer].forEach(function(container) {
-        container.addEventListener('drop', handleDrop, false);
-        container.addEventListener('dropover',handleDrop, false);
-        container.addEventListener('dragover', showPanel, false);
-    });
-
-// then map-specific events
-    mapContainer.addEventListener('dragstart', showPanel, false);
-    mapContainer.addEventListener('dragenter', showPanel, false);
-
-// then the overlay specific events (since it only appears once drag starts)
-    dropContainer.addEventListener('dragend', hidePanel, false);
-    dropContainer.addEventListener('dragleave', hidePanel, false);
-}
-
-function showPanel(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    document.getElementById('drop-container').style.display = 'block';
-    return false;
-}
-
-function hidePanel(e) {
-    document.getElementById('drop-container').style.display = 'none';
-}
-
 function loadJsonp(url_str){
     $.ajax({
         type:'GET',
         url:url_str,
         async:false,
+        data:null,
         jsonpCallback:'map_func',
         contentType:'application/json',
         dataType:'jsonp',
-        success:loadGeoJsonString,
+        success:function(response){
+            L.geoJson(response).addTo(map);
+            console.log(response);
+        },
         error:function(e){
             console.log(e);
         }
     });
 }
 
-function handleDrop(e) {
-    e.preventDefault();
-    hidePanel(e);
-    var url = e.dataTransfer.getData("url") || e.dataTransfer.getData("text/uri-list");
-    var files = e.dataTransfer.files;
-    if (files.length) {
-        // process file(s) being dropped
-        // grab the file data from each file
-        for (var i = 0, file; file = files[i]; i++) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                loadGeoJsonString(e.target.result);
-            };
-            reader.onerror = function(e) {
-                console.error('reading failed');
-            };
-            reader.readAsText(file);
-        }
-    } else if(url){
-        loadJsonp(url);
-    }
-    else {
-        // process non-file (e.g. text or html) content being dropped
-        // grab the plain text version of the data
-        var plainText = e.dataTransfer.getData('text/plain');
+function handleDragStart(e) {
+    this.style.opacity = '0.4';  // this / e.target is the source node.
+}
 
-        if (plainText) {
-
-            loadGeoJsonString(plainText);
-        }
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault(); // Necessary. Allows us to drop.
     }
 
-// prevent drag event from bubbling further
+    e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+
     return false;
 }
 
-initMap();
-initEvents();
+function handleDragEnter(e) {
+    // this / e.target is the current hover target.
+    this.classList.add('over');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('over');  // this / e.target is previous target element.
+}
+
+function handleDragEnd(e) {
+    // this/e.target is the source node.
+    this.classList.remove('over');
+}
+function init_drop(){
+    dropbox = document.getElementById('map');
+    dropbox.addEventListener('dragstart', handleDragStart, false);
+    dropbox.addEventListener('dragenter', handleDragEnter, false)
+    dropbox.addEventListener('dragover', handleDragOver, false);
+    dropbox.addEventListener('dragleave', handleDragLeave, false);
+    dropbox.addEventListener('dragend', handleDragEnd, false);
+    dropbox.addEventListener('drop', drop, false);
+}
+
+function drop(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    var url = evt.dataTransfer.getData("url") || evt.dataTransfer.getData("text/uri-list");
+    var files = evt.dataTransfer.files;
+    var plainText = evt.dataTransfer.getData('text/plain');
+    alert(evt);
+    if(files.length){
+        alert('files length : ' + files.length);
+        load_files(files)
+    }
+    else if(url) {
+        alert('url: ' + url);
+        loadJsonp(url);
+    }
+    else if(plainText){
+        alert(plainText)
+        loadGeoJsonString(plainText);
+    }
+    else{
+        alert('wrong drop');
+    }
+}
+
+function load_files(files) {
+
+    for (var i = 0, file; file = files[i]; i++) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            loadGeoJsonString(e.target.result);
+        };
+        reader.onerror = function(e) {
+            console.error('reading failed');
+        };
+        reader.readAsText(file);
+
+    }
+}
