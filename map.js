@@ -4,7 +4,6 @@
 
 
 var map;
-var dropbox;
 
 function initMap() {
     // set up the map
@@ -82,21 +81,18 @@ function drop(evt) {
     var url = evt.dataTransfer.getData("url") || evt.dataTransfer.getData("text/uri-list");
     var files = evt.dataTransfer.files;
     var plainText = evt.dataTransfer.getData('text/plain');
-    alert(evt);
     if(files.length){
-        alert('files length : ' + files.length);
         load_files(files)
     }
     else if(url) {
-        alert('url: ' + url);
         loadJsonp(url);
     }
     else if(plainText){
-        alert(plainText)
+
         loadGeoJsonString(plainText);
     }
     else{
-        alert('wrong drop');
+        console.log('wrong drop');
     }
 }
 
