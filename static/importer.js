@@ -23,6 +23,7 @@ build_query = function(api_result , callback) {
         country: 'Israel',
         format: 'json',
         addressdetails: 1,
+        'accept-language': 'en',
         polygon_geojson: 1,
         limit: 5
     };

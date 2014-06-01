@@ -57,3 +57,19 @@ exports.writeJsonp = function(file, obj, wrapper, callback){
     str+= ')'
     fs.writeFile(file, str, callback);
 }
+
+exports.writeArry2File = function(file, array, var_str, callback){
+    var str = 'var ';
+    str += var_str + ' = ';
+
+    try {
+        str += JSON.stringify(array);
+    } catch (err) {
+        if (callback) {
+            callback(err, null);
+        }
+        return;
+    }
+    str+= ';'
+    fs.writeFile(file, str, callback);
+}
