@@ -9,7 +9,7 @@ var jf = require('jsonfile');
 
 var tools = require('../../static/tools');
 
-tools.get_collection('entities', function(err, collection) {
+tools.get_collection('entities2', function(err, collection) {
     collection.aggregate([{$project:
     {_id: 0,
         'omuni_id' :1,
@@ -22,7 +22,7 @@ tools.get_collection('entities', function(err, collection) {
                 for (var i = 0; i < results.length; i++) {
                     result = results[i];
                     result['type'] = 'Feature';
-                    var file = './jsonp/' + result.omuni_id +'.jsonp';
+                    var file = '../jsonp/' + result.omuni_id +'.jsonp';
                     tools.writeJsonp(file,result,'map_func',function(err){
                         if(err) { console.log('hi2' + err)}
                     });
