@@ -5,6 +5,7 @@
 var Db = require('mongodb').Db,
     MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
+    fs = require('fs'),
     async = require('async');
 /*** @type {string}  Open Muni Api EndPoint **/
 exports.OPEN_MUNI = 'http://ext.openmuni.org.il/v1/entities/';
@@ -38,4 +39,21 @@ exports.loop_api = function(api_results, result_func, end_func) {
             end_func(err)
 
         });
+}
+
+exports.writeJsonp = function(file, obj, wrapper, callback){
+
+    var str = wrapper;
+    str += '(';
+
+    try {
+        str += JSON.stringify(obj);
+    } catch (err) {
+        if (callback) {
+            callback(err, null);
+        }
+        return;
+    }
+    str+= ')'
+    fs.writeFile(file, str, callback);
 }

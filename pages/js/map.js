@@ -5,6 +5,7 @@
 
 var map;
 
+
 function initMap() {
     // set up the map
     map = L.map("map").setView([31.783333, 35.216667], 9);
@@ -110,3 +111,10 @@ function load_files(files) {
 
     }
 }
+
+$('#autocomplete').autocomplete({
+    lookup: suggestions,
+    onSelect: function (suggestion) {
+        loadJsonp('http://kobiluria.github.io/MoneyMap/jsonp/' + suggestion.data+ '.jsonp')
+    }
+});

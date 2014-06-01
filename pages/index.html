@@ -8,13 +8,24 @@
     <title>Drag and Drop GeoJSON</title>
     <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
-    <script src="./map.js"></script>
+
+    <script src="js/map.js"></script>
+    <script src="js/entities.js"></script>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css">
     <link rel="stylesheet" href="./style.css">
 
 </head>
 <body>
 <div id="map"></div>
+<div id="content">
+    <h1>MoneyMap autocomplete</h1>
+    <p>Just start typing an Entity Name in hebrew</p>
+
+    <div id="searchfield">
+        <form><input type="text" name="entity" class="biginput" id="autocomplete"></form>
+    </div><!-- @end #searchfield -->
+
+</div><!-- @end #content -->
 <script>
     init_drop();
     initMap();
