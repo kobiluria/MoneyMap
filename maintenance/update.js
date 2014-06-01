@@ -5,18 +5,18 @@
 var jf = require('jsonfile');
 var tools = require('../../static/tools');
 
-tools.get_collection('entities',function(err,collection,mongoclient){
-    collection.aggregate([{'$project':{_id:0,'value':'$omuni_name','data':'$omuni_id'}}],
+tools.get_collection('entities2',function(err,collection,mongoclient){
+    collection.aggregate([{'$project':{_id:0,'value':'$osm_name','data':'$omuni_id'}}],
         function(err, result){
             if(err){ console.log(err)}
             else{
-                var file = './entities.js';
-                var response = {'query': 'Unit',"suggestions":result};
-                jf.writeFile(file, response, function(err) {
-                    console.log(err);
+                var file = '../js/entities.js';
+                tools.writeArry2File(file, result, 'collection', function(err) {
+                    if(err) {console.log(err) }
+                    else {console.log('done')}
 
                 });
             }
 
-        })
-})
+        });
+});

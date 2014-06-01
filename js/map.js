@@ -5,7 +5,6 @@
 
 var map;
 
-
 function initMap() {
     // set up the map
     map = L.map("map").setView([31.783333, 35.216667], 9);
@@ -112,9 +111,16 @@ function load_files(files) {
     }
 }
 
-$('#autocomplete').autocomplete({
-    lookup: suggestions,
-    onSelect: function (suggestion) {
-        loadJsonp('http://kobiluria.github.io/MoneyMap/jsonp/' + suggestion.data+ '.jsonp')
-    }
+$(function(){
+    // setup autocomplete function pulling from currencies[] array
+    $('#autocomplete').autocomplete({
+        lookup: collection,
+        onSelect: function (suggestion) {
+            var thehtml = '<strong>Entity Name:</strong> ' + suggestion.value + ' <br> <strong>ID:</strong> ' + suggestion.data;
+            $('#outputcontent').html(thehtml);
+            loadJsonp('http://kobiluria.github.io/MoneyMap/jsonp/' + suggestion.data+ '.jsonp')
+        }
+    });
+
+
 });
