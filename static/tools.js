@@ -9,6 +9,10 @@ var Db = require('mongodb').Db,
     async = require('async');
 /*** @type {string}  Open Muni Api EndPoint **/
 exports.OPEN_MUNI = 'http://ext.openmuni.org.il/v1/entities/';
+exports.NOMINATIM = 'http://nominatim.openstreetmap.org/search?';
+exports.NOMINATIM_REVERSE = 'http://nominatim.openstreetmap.org/reverse?';
+exports.OPEN_MUNI = 'http://ext.openmuni.org.il/v1/entities/';
+
 
 exports.get_collection = function(name, callback) {
 
@@ -36,7 +40,7 @@ exports.loop_api = function(api_results, result_func, end_func) {
             result_func(result, callback);
         },
         function(err) {
-            end_func(err)
+            end_func(err);
 
         });
 }

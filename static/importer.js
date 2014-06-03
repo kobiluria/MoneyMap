@@ -152,7 +152,7 @@ initializeAll = function() {
 
         db.collection('entities2', function(err, collection) {
 
-            unirest.get('http://ext.openmuni.org.il/v1/entities/')
+            unirest.get(tools.OPEN_MUNI)
                 .end(function(response) {proccess_api(response, collection);});
         });
     });
@@ -160,4 +160,106 @@ initializeAll = function() {
 
 
 
-initializeAll();
+function update_collection() {
+    var updated = 0;
+    var inserted = 0;
+    tools.get_collection('entities', function(err, collection, mongoclient) {
+        collection.find().toArray(function(err, docs) {
+            console.log(err);
+            console.log(docs.length)});
+
+        var curser = collection.find({}); // find all documents.
+        curser.each(function(err, item) {
+            if (item) {
+                async.waterfall([
+                    function(callback) {setTimeout(callback, 2000)},
+                    function(callback) { callback(null, item)},
+                    build_reverse,
+                    call_reverse,
+                    get_osm_results,
+                    get_correct_osm,
+                    build_doc
+                ], function(err, doc) {
+                    if (doc.geojson == item.geojson &&
+                        doc.omuni_id == item.omuni_id) {
+                        collection.update(
+                            item,
+                            {$set: {date_updated: new Date()}},
+                            function(err, count) {
+                                console.log('updated : ' + item.osm_name);
+                                updated += count;
+                            });
+                    }
+                    else {
+                        collection.insert(doc, function(err, result) {
+                            console.log('inserted : ' + result.osm_name);
+                            inserted += 1;
+                        });
+                    }
+                });
+            }
+            else{
+                return;
+
+            }
+        });
+    });
+}
+
+call_reverse = function(api_result, query_str, callback) {
+    unirest.get(tools.NOMINATIM_REVERSE + query_str)
+        .end(function(reverse_result) {
+            var osm_query = {city: reverse_result.body.address.city,
+                country: reverse_result.body.address.country,
+                format: 'json',
+                addressdetails: 1,
+                'accept-language': 'en',
+                polygon_geojson: 1,
+                limit: 5
+            }
+            var query_str = Object.keys(osm_query).map(function(key) {
+                return encodeURIComponent(key) + '=' +
+                    encodeURIComponent(osm_query[key]);
+            }).join('&');
+            console.log(query_str);
+            callback(null, query_str, api_result); // sends null as the
+        });
+}
+
+
+/*************************************************************************
+ * Build a Query to search  document for the mongo db database.
+ * @param {JSON} doc the open muni osm id to reverse geocode.
+ * @param {Function} callback a callback function, the callback
+ * should be in the form callback(err, query_result, api_result)
+ * **********************************************/
+build_reverse = function(doc, callback) {
+
+    var osm_query = {
+        osm_type: 'R',
+        osm_id: doc.osm_id,
+        format: 'json',
+        addressdetails: 1
+    };
+
+    var query_str = Object.keys(osm_query).map(function(key) {
+        return encodeURIComponent(key) + '=' +
+            encodeURIComponent(osm_query[key]);
+    }).join('&');
+
+    console.log(query_str);
+    unirest.get(tools.OPEN_MUNI + doc.omuni_id).end(function(results) {
+        if (results) {
+            callback(null, results.body.results, query_str);
+
+        }
+        //TODO need to add an error system
+        else {
+            console.log('error reaching Open Muni');
+            callback('err');
+        }
+    });
+};
+
+
+update_collection();
