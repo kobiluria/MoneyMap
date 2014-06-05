@@ -160,48 +160,49 @@ initializeAll = function() {
 
 
 
-function update_collection() {
+exports.update_collection = function() {
     var updated = 0;
     var inserted = 0;
-    tools.get_collection('entities', function(err, collection, mongoclient) {
-        collection.find().toArray(function(err, docs) {
-            console.log(err);
-            console.log(docs.length)});
-
-        var curser = collection.find({}); // find all documents.
-        curser.each(function(err, item) {
-            if (item) {
-                async.waterfall([
-                    function(callback) {setTimeout(callback, 2000)},
-                    function(callback) { callback(null, item)},
-                    build_reverse,
-                    call_reverse,
-                    get_osm_results,
-                    get_correct_osm,
-                    build_doc
-                ], function(err, doc) {
-                    if (doc.geojson == item.geojson &&
-                        doc.omuni_id == item.omuni_id) {
-                        collection.update(
-                            item,
-                            {$set: {date_updated: new Date()}},
-                            function(err, count) {
-                                console.log('updated : ' + item.osm_name);
-                                updated += count;
+    tools.get_collection('entities_try', function(err, collection, mongoclient) {
+        collection.find({}).toArray(function(err, results) { // find all documents.
+            async.whilst(
+                function() {return (results.length > 0)}
+                ,function(top_callback) {
+                    var item = results.shift();
+                    async.waterfall([
+                        function(callback) {setTimeout(callback, 2000)},
+                        function(callback) { callback(null, item);},
+                        build_reverse,
+                        call_reverse,
+                        get_osm_results,
+                        get_correct_osm,
+                        build_doc
+                    ], function(err, doc) {
+                        console.log(doc);
+                        console.log(item);
+                        if (doc.geojson.coordinates == item.geojson.coordinates &&
+                            doc.omuni_id == item.omuni_id) {
+                            collection.update(
+                                item,
+                                {$set: {date_updated: new Date()}},
+                                function(err, count) {
+                                    console.log('updated : ' + item.osm_name);
+                                    updated += count;
+                                    top_callback();
+                                });
+                        }
+                        else {
+                            collection.insert(doc, function(err, result) {
+                                console.log('inserted : ' + result[0].osm_name);
+                                inserted += 1;
+                                top_callback();
                             });
-                    }
-                    else {
-                        collection.insert(doc, function(err, result) {
-                            console.log('inserted : ' + result.osm_name);
-                            inserted += 1;
-                        });
-                    }
-                });
-            }
-            else{
-                return;
+                        }
+                    })},function(err) {
 
-            }
+                    console.log('got here');
+                    console.log(err);
+                });
         });
     });
 }
@@ -248,9 +249,10 @@ build_reverse = function(doc, callback) {
     }).join('&');
 
     console.log(query_str);
+    console.log(tools.OPEN_MUNI + doc.omuni_id);
     unirest.get(tools.OPEN_MUNI + doc.omuni_id).end(function(results) {
         if (results) {
-            callback(null, results.body.results, query_str);
+            callback(null, results.body, query_str);
 
         }
         //TODO need to add an error system
@@ -261,5 +263,4 @@ build_reverse = function(doc, callback) {
     });
 };
 
-
-update_collection();
+this.update_collection();
