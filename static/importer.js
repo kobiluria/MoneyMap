@@ -180,7 +180,9 @@ exports.update_collection = function() {
                     ], function(err, doc) {
                         console.log(doc);
                         console.log(item);
-                        if (doc.geojson.coordinates == item.geojson.coordinates &&
+                        var doc_string = JSON.stringify(doc.geojson);
+                        var item_string = JSON.stringify(item.geojson);
+                        if (doc_string == item_string &&
                             doc.omuni_id == item.omuni_id) {
                             collection.update(
                                 item,
