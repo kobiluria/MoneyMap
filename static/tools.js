@@ -14,6 +14,34 @@ exports.NOMINATIM_REVERSE = 'http://nominatim.openstreetmap.org/reverse?';
 exports.OPEN_MUNI = 'http://ext.openmuni.org.il/v1/entities/';
 
 
+
+/*************************************************************************
+ * Build a document for the mongo db database.
+ * @param {JSON} osm_entity
+ * @param {JSON} api_result
+ * @param {Function} callback a callback function, the callback
+ * should be in the form callback(err, doc)
+ * *************************************************************************/
+exports.build_doc = function(osm_entity, api_result, callback) {
+    var doc = {
+        omuni_name: api_result.name,
+        osm_name: osm_entity.display_name,
+        omuni_id: api_result.id,
+        muni_code: api_result.code,
+        date_obtained: new Date(),
+        date_updated: new Date(),
+        geojson: osm_entity.geojson,
+        osm_id: osm_entity.osm_id,
+        place_id: osm_entity.place_id,
+        license: osm_entity.licence
+    };
+    callback(null, doc);
+};
+
+
+
+
+
 exports.get_collection = function(name, callback) {
 
     // Set up the connection to the local db
