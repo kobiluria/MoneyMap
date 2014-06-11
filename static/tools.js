@@ -105,3 +105,10 @@ exports.writeArry2File = function(file, array, var_str, callback){
     str+= ';'
     fs.writeFile(file, str, callback);
 }
+
+exports.closeMongoClient = function(err, mongoclient){
+    if (err) {
+        console.log(err);
+    }
+    mongoclient.close();
+}
