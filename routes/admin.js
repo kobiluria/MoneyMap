@@ -49,9 +49,9 @@ exports.find = function(req, res) {
  * @param {String} search the clients search req.
  * @param {Response} res the response to the client.
  * ************************************************************/
-find_missing = function(search_str, callback, mongoclient) {
+find_missing = function(search_str, callback) {
 
-    tools.get_collection('entities', function(err, collection) {
+    tools.get_collection('entities', function(err, collection, mongoclient) {
         unirest.get(tools.OPEN_MUNI).end(function(api) {
             var results = api.body.results;
             var answer = [];

@@ -6,7 +6,7 @@ var tools = require('../static/tools');
 var osm_tools = require('../static/osmtools');
 var async = require('async');
 
-exports.insertById = function(res, req){
+exports.insertById = function(req, res){
 
     var osm_id = req.query.osm_id;
     var omuni_id = req.query.omuni_id;
@@ -21,6 +21,10 @@ exports.insertById = function(res, req){
             osm_tools.get_correct_osm,
             tools.build_doc
         ], function(err, doc) {
+            //TODO safe insert : i.e will only insert if the object doesn't exists.
+            //TODO safe insert :  should only insert object where all fields are full.
+            //TODO build a standard for the output in cases of insert and update.
+            //TODO add a safe insert function in the tools library.
             collection.insert(doc, function(err, result) {
                 console.log('inserted : ' + result[0].osm_name);
                 res.json({inserted: result[0].osm_name});

@@ -57,7 +57,7 @@ exports.get_correct_osm = function(osm_results, api_result, callback) {
 
 /*************************************************************************
  * Get all results from open street map given a string Query
- * @param {string} query
+g * @param {string} query
  * @param {JSON} api_result
  * @param {Function} callback a callback function, the callback
  * should be in the form callback(err, osm_results, api_result)
@@ -113,9 +113,12 @@ exports.build_reverse = function(doc, callback) {
     }).join('&');
 
     console.log(query_str);
+    //FIXME this should be the open muni id -> its actually the open muni code!!
     console.log(tools.OPEN_MUNI + doc.omuni_id);
     unirest.get(tools.OPEN_MUNI + doc.omuni_id).end(function(results) {
         if (results) {
+            // for debug
+            console.log(results.body);
             callback(null, results.body, query_str);
 
         }

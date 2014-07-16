@@ -105,14 +105,14 @@ update_item = function(callback, item) {
         console.log(doc);
         console.log(item);
         var doc_string = JSON.stringify(doc.geojson);
-        var item_string = JSON.stringify(item.geojson);
+        var item_string = JSON.stringify(item['geojson']);
         if (doc_string == item_string &&
-            doc.omuni_id == item.omuni_id) {
+            doc.omuni_id == item['omuni_id']) {
             collection.update(
                 item,
                 {$set: {date_updated: new Date()}},
-                function(err, count) { //TODO deal with an error
-                    console.log('updated : ' + item.osm_name);
+                function() { //TODO deal with an error
+                    console.log('updated : ' + item['osm_name']);
                     callback();
                 });
         }
@@ -125,4 +125,3 @@ update_item = function(callback, item) {
     });
 
 };
-
