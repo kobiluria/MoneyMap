@@ -68,8 +68,14 @@ exports.get_osm_results = function(query, api_result, callback) {
     });
 };
 
-
+/**
+ * Call the reverse Nominatim API in order to get the address
+ * @param {JSON} api_result     the Open Muni entity result
+ * @param {String} query_str    the intial query string
+ * @param {Function} callback   the callback function
+ */
 exports.call_reverse = function(api_result, query_str, callback) {
+    console.log(tools.NOMINATIM_REVERSE + query_str);
     unirest.get(tools.NOMINATIM_REVERSE + query_str)
         .end(function(reverse_result) {
             var osm_query = {city: reverse_result.body.address.city,

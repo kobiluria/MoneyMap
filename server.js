@@ -20,7 +20,7 @@ var express = require('express'),
 var app = express(); // configure the app using express!!
 app.use(logger());
 app.use(bodyParser());
-app.use(cookieParser())
+app.use(cookieParser());
 var port = process.env.PORT || 3000;
 var router = express.Router();
 var gui = express.Router();
@@ -29,21 +29,23 @@ app.use(express.static(__dirname + '/public'));
 /**************************************
  * Passport session
  **************************************/
-passport.use(new GitHubStrategy({
+passport.use(
+
+    new GitHubStrategy({
         clientID: oauth.GITHUB_CLIENT_ID,
         clientSecret: oauth.GITHUB_CLIENT_SECRET,
-        callbackURL: "http://127.0.0.1:3000/api/github/callback"
+        callbackURL: 'http://127.0.0.1:3000/api/github/callback'
     },
     function(accessToken, refreshToken, profile, done) {
         // asynchronous verification, for effect...
-        process.nextTick( function () {
+        process.nextTick(function() {
             return done(null, profile);
         });
     }
 ));
 
-app.use(session(
-    {   secret: 'ilovescotchscotchyscotchscotch',
+app.use(session({
+        secret: 'ilovescotchscotchyscotchscotch',
         saveUninitialized: true,
         resave: true
     }
@@ -66,7 +68,7 @@ app.use('/api', router);
 app.use('/gui', gui);
 router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
-router.get('/add', ensureAuthenticated,insert.insertById);
+router.get('/add', ensureAuthenticated, insert.insertById);
 router.get('/maps/?', maps.map_by_code);
 router.get('/maps/:id', maps.map_by_id);
 
@@ -81,51 +83,59 @@ gui.get('/:id', gui_route.map_by_id);
 /**************************************
  * Routing for Login
  **************************************/
+
 router.get('/login',
     passport.authenticate('github'),
-    function(req, res){
+    function(req, res) {
         // The request will be redirected to GitHub for authentication, so this
         // function will not be called.
     });
-//TODO add a page for wrong login
+
 router.get('/github/callback',
-    passport.authenticate('github', { failureRedirect: '/api/badLogin' }),
+    passport.authenticate('github', { failureRedirect: '/api/pleaseLogin' }),
     function(req, res) {
-        console.log('here123');
+        console.log(req);
         res.redirect('/api/goodLogin');
     });
-router.get('/logout', function(req, res){
+router.get('/logout', function(req, res) {
     req.logout();
     res.redirect('/');
 });
-router.get('/badLogin', function(req, res) {
-    res.json({error: 'Bad Login'});
-});
+
 router.get('/goodLogin', function(req, res) {
         res.json({success: 'successful login'});
     }
 )
-router.get('/pleaseLogin', function(req, res) {
+router.get('/pleaseLogin', function(req, res)
+    {
+        loginMessage = {
+            error: 'please login',
+            login: 'http://localhost:3000/api/login'
+        };
+        if(req.path.equals())
 
-        res.json({error: 'please login', login: 'http://localhost:3000/api/login'});
+        res.json(loginMessage);
     }
 )
-router.get('/session', function(req, res){
-    res.json({ message: req.session });
-});
-
-
-function ensureAuthenticated(req, res, next) {
-    console.log(req.isAuthenticated());
-    if (req.isAuthenticated()) {
-
-        return next();
-    }
-    res.redirect('/api/pleaseLogin');
-}
 
 /***************************************
  * Start server
  * **************************************/
 app.listen(port);
 console.log('API is listening on port :' + port);
+
+
+
+function ensureAuthenticated(req, res, next) {
+
+    if (req.isAuthenticated()) {
+
+        next();
+    }
+    else {
+
+
+    res.redirect('/api/pleaseLogin');
+
+    }
+}

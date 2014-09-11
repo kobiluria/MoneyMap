@@ -92,7 +92,8 @@ exports.update_collection = function() {
  * @param {JSON} item our DB item to update
  *********************************************************************/
 update_item = function(callback, item) {
-
+    // note that the callback is actually called in the end.
+    // the callback in the async library is its own internal callback.
     async.waterfall([
         function(callback) {setTimeout(callback, 2000)},
         function(callback) { callback(null, item);},
@@ -107,6 +108,7 @@ update_item = function(callback, item) {
         var doc_string = JSON.stringify(doc.geojson);
         var item_string = JSON.stringify(item['geojson']);
         if (doc_string == item_string &&
+        // its the same geojson. let's update it!
             doc.omuni_id == item['omuni_id']) {
             collection.update(
                 item,
