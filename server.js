@@ -15,7 +15,9 @@ var express = require('express'),
     session = require('express-session'),
     oauth = require('./static/oauth'),
     cookieParser = require('cookie-parser'),
+    multipart = require('connect-multiparty'),
     basic_response = require('./routes/basic_response');
+
 
 var app = express(); // configure the app using express!!
 app.use(logger());
@@ -68,9 +70,11 @@ app.use('/api', router);
 app.use('/gui', gui);
 router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
-router.get('/add', ensureAuthenticated, insert.insertById);
+// took out ensureAuthenticated, from the add function. should go back in once production.
+router.get('/add', insert.insertById);
 router.get('/maps/?', maps.map_by_code);
 router.get('/maps/:id', maps.map_by_id);
+router.post('/upload',multipart(),insert.uploadCsv);
 
 /**************************************
  * Routing and Settings GUI
@@ -112,8 +116,6 @@ router.get('/pleaseLogin', function(req, res)
             error: 'please login',
             login: 'http://localhost:3000/api/login'
         };
-        if(req.path.equals())
-
         res.json(loginMessage);
     }
 )

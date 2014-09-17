@@ -19,7 +19,15 @@
         "async":"",
         "unirest":"",
         "jsonfile":"",
-        "jade":""
+        "jade":"",
+        "passport":"",
+        "passport-http":"",
+        "passport-github":"",
+        "express-session":"",
+        "flash":"",
+        "cookie-parser":"",
+        "ya-csv":"",
+        "connect-multiparty":""
 },
 
 "engines": {

@@ -7,11 +7,18 @@ var osm_tools = require('../static/osmtools');
 var async = require('async');
 var csv = require('ya-csv');
 
-exports.insertById = function(req, res) {
 
+exports.insertById = function(req, res) {
     var osm_id = req.query.osm_id;
     var omuni_id = req.query.omuni_id;
     var item = {osm_id: osm_id, omuni_id: omuni_id };
+    insertDatabaseById(item,function(message) {
+        res.json(message);
+    })
+
+}
+
+function insertDatabaseById(item, callback){
 
     tools.get_collection('entities', function(err, collection, mongoclient) {
         async.waterfall([
@@ -24,8 +31,11 @@ exports.insertById = function(req, res) {
             tools.build_doc
         ], function(err, doc) {
             if(err){
-                res.json({ERROR:err.message});
                 mongoclient.close();
+                var message = {};
+                message.ERROR = err;
+                message.item = item;
+                callback(message);
             }
             //TODO safe insert :  should only insert object where all fields are full.
             //TODO build a standard for the output in cases of insert and update.
@@ -33,30 +43,49 @@ exports.insertById = function(req, res) {
             else {
                 collection.insert(doc, function (err, result) {
                     console.log('inserted : ' + result[0].osm_name);
-                    res.json({inserted: result[0].osm_name});
                     mongoclient.close();
+                    callback({item: result[0].osm_name});
                 });
-
             }
         });
     });
 };
 
-exports.insertByCSV = function(req, res) {
-    console.log('File name is ' + req.files.insertCSV.name);
-    console.log('File size is ' + req.files.insertCSV.size);
-    console.log('File size is ' + req.files.insertCSV.path);
-    var reader = csv.createCsvFileReader(req.files.insertCSV.path, {
+exports.uploadCsv = function(req,res) {
+    var found = [];
+    var error = [];
+    var count = 0;
+    var reader = csv.createCsvFileReader(req.files.csvFile.path, {
         'separator': ',',
         'quote': '"',
         'escape': '"',
-        'comment': ''
+        'comment': '',
+        'columnsFromHeader': true
     });
     reader.addListener('data', function(data) {
-        console.log(data);
-        //TODO check if the entity is updated.
-        //TODO if the entity is not updated should call the insertById
-
+            count++;
+            insertDatabaseById(data,function(message){
+                if(message.ERROR){
+                    error.push(message.item);
+                    count--;
+                }
+                else{
+                    found.push(message.item);
+                    count--;
+                }
+            });
     });
-    res.json({ok:'ok'});
-};
+
+    reader.addListener('end', function(data) {
+        async.whilst(
+           function () {
+            return (count > 0);
+        }, function (callback) {
+            setTimeout(callback, 1000);
+        }, function (finsh) {
+            res.json({inserted: found, error: error});
+        });
+    });
+
+}
+

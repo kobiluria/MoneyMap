@@ -1,6 +1,9 @@
+
+
 /**
- * Created by kobi on 5/19/14.
- */
+ * a module of admin operations in the system.
+ * @module admin
+ * */
 var Db = require('mongodb').Db,
     MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
@@ -8,7 +11,7 @@ var Db = require('mongodb').Db,
     unirest = require('unirest'),
     tools = require('../static/tools');
 
-/************************************************************
+/**
  * Find a Admin Query in our DB
  * The Request is parased using the q= string
  * and depending on the request we will use either an
@@ -17,7 +20,7 @@ var Db = require('mongodb').Db,
  * Correct function and query.
  * @param {Request} req the clients search req.
  * @param {Response} res the response to the client.
- * *********************************************************/
+ */
 exports.find = function(req, res) {
     var search = {};
     var search_str = req.query.q;
@@ -40,7 +43,7 @@ exports.find = function(req, res) {
     }
 }
 
-/**************************************************************
+/**
  *  Find something missing in our DB
  *  entities which exists in Open Muni
  *  but doesn't exists in our database this function can query
@@ -48,7 +51,7 @@ exports.find = function(req, res) {
  *  for each entity in the open muni database.
  * @param {String} search the clients search req.
  * @param {Response} res the response to the client.
- * ************************************************************/
+ */
 find_missing = function(search_str, callback) {
 
     tools.get_collection('entities', function(err, collection, mongoclient) {
@@ -85,13 +88,12 @@ find_missing = function(search_str, callback) {
         });
     });
 }
-/***************************************************************
+/**
  * An aggregation search on our DB
  * @param {Array} agg a aggregation framework array
  * @param {Function} callback  a callback function
- ***************************************************************/
+ */
 aggregate = function(agg, callback) {
-    // project to standerd Open Muni Api call
     agg.push({$project: {_id: 0, code: '$muni_code',name:'$name', id: '$omuni_id'}});
     console.log(agg);
     tools.get_collection('entities', function(err, collection, mongoclient) {
