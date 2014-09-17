@@ -27,11 +27,17 @@
         "flash":"",
         "cookie-parser":"",
         "ya-csv":"",
-        "connect-multiparty":""
+        "connect-multiparty":"",
+        "chai":"",
+        "supertest":""
 },
 
 "engines": {
         "node": "0.8.4",
         "npm": "1.1.49"
-    }
+},
+"scripts": {
+"test": "make test"
+}
+
 }
