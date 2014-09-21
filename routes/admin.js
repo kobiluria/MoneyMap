@@ -34,14 +34,14 @@ exports.find = function(req, res) {
             aggregate(search, resposne);
             break;
         case 'not_muni':
-            search = [{$match: {muni_code:''}}];
+            search = [{$match: {muni_code: ''}}];
 
     }
     function resposne(result) {
-        res.json({request: req.query.q, result: result});
+        res.json({request: req.query.q, result: result, count: result.length});
 
     }
-}
+};
 
 /**
  *  Find something missing in our DB
@@ -54,12 +54,19 @@ exports.find = function(req, res) {
  */
 find_missing = function(search_str, callback) {
 
-    tools.get_collection('entities', function(err, collection, mongoclient) {
+    tools.get_collection('entities_new', function(err, collection, mongoclient) {
         unirest.get(tools.OPEN_MUNI).end(function(api) {
             var results = api.body.results;
             var answer = [];
             tools.loop_api(results, find_entity, send_missing);
             function find_entity(result, callback) {
+                var code = result['code'];
+                console.log(result['code']);
+                if(code == ' ' || code =='' || code == " " || code ==""){
+                    console.log('llalallalallallallal');
+                    callback();
+                    return;
+                }
                 var search;
                 switch (search_str) {
                     case 'missing' : search = {'omuni_id': result.id};
@@ -87,7 +94,7 @@ find_missing = function(search_str, callback) {
             }
         });
     });
-}
+};
 /**
  * An aggregation search on our DB
  * @param {Array} agg a aggregation framework array
@@ -102,5 +109,5 @@ aggregate = function(agg, callback) {
             callback(result);
         });
     });
-}
+};
 
