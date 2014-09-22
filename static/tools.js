@@ -59,7 +59,7 @@ exports.get_collection = function(name, callback) {
             process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
             process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
             process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
-            'MoneyMap';
+            process.env.OPENSHIFT_APP_NAME;
     }
 
     //load the Client interface
