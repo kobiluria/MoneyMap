@@ -38,8 +38,10 @@ exports.find = function(req, res) {
 
     }
     function resposne(result) {
-        var missing_vals = {request: req.query.q, result: result, count: result.length};
-        res.json(missing_vals);
+        var missing_vals =JSON.stringify({request: req.query.q, result: result, count: result.length});
+        console.log(missing_vals);
+  
+        res.send(missing_vals);
 
     }
 };
