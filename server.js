@@ -1,159 +1,149 @@
-#!/bin/env node
-//  OpenShift sample Node application
-var express = require('express');
-var fs      = require('fs');
+/***************************************
+ * Setup of express:
+ * express will the main tool to serve res
+ * from the api requests.
+ ***************************************/
+var express = require('express'),
+    logger = require('morgan'),
+    bodyParser = require('body-parser'),
+    admin = require('./routes/admin'),
+    importer = require('./static/importer'),
+    insert = require('./routes/insert'),
+    maps = require('./routes/maps'),
+    gui_route = require('./routes/gui'),
+    passport = require('passport'),
+    GitHubStrategy = require('passport-github').Strategy,
+    session = require('express-session'),
+    oauth = require('./static/oauth'),
+    cookieParser = require('cookie-parser'),
+    multipart = require('connect-multiparty'),
+    basic_response = require('./routes/basic_response');
 
 
-/**
- *  Define the sample application.
- */
-var SampleApp = function() {
+var app = express(); // configure the app using express!!
+app.use(logger());
+app.use(bodyParser());
+app.use(cookieParser());
+var port = process.env.PORT || 3000;
+var router = express.Router();
+var gui = express.Router();
+app.use(express.static(__dirname + '/public'));
 
-    //  Scope.
-    var self = this;
+/**************************************
+ * Passport session
+ **************************************/
+passport.use(
 
-
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
-
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
-    self.setupVariables = function() {
-        //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-
-        if (typeof self.ipaddress === "undefined") {
-            //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-            //  allows us to run/test the app locally.
-            console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-            self.ipaddress = "127.0.0.1";
-        };
-    };
-
-
-    /**
-     *  Populate the cache.
-     */
-    self.populateCache = function() {
-        if (typeof self.zcache === "undefined") {
-            self.zcache = { 'index.html': '' };
-        }
-
-        //  Local cache for static content.
-        self.zcache['index.html'] = fs.readFileSync('./index.html');
-    };
-
-
-    /**
-     *  Retrieve entry (content) from cache.
-     *  @param {string} key  Key identifying content to retrieve from cache.
-     */
-    self.cache_get = function(key) { return self.zcache[key]; };
-
-
-    /**
-     *  terminator === the termination handler
-     *  Terminate server on receipt of the specified signal.
-     *  @param {string} sig  Signal to terminate on.
-     */
-    self.terminator = function(sig){
-        if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
-           process.exit(1);
-        }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
-    };
-
-
-    /**
-     *  Setup termination handlers (for exit and a list of signals).
-     */
-    self.setupTerminationHandlers = function(){
-        //  Process on exit and signals.
-        process.on('exit', function() { self.terminator(); });
-
-        // Removed 'SIGPIPE' from the list - bugz 852598.
-        ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
-         'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-        ].forEach(function(element, index, array) {
-            process.on(element, function() { self.terminator(element); });
+    new GitHubStrategy({
+        clientID: oauth.GITHUB_CLIENT_ID,
+        clientSecret: oauth.GITHUB_CLIENT_SECRET,
+        callbackURL: 'http://127.0.0.1:3000/api/github/callback'
+    },
+    function(accessToken, refreshToken, profile, done) {
+        // asynchronous verification, for effect...
+        process.nextTick(function() {
+            return done(null, profile);
         });
-    };
+    }
+));
+
+app.use(session({
+        secret: 'ilovescotchscotchyscotchscotch',
+        saveUninitialized: true,
+        resave: true
+    }
+)); // session secret
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+passport.deserializeUser(function(obj, done) {
+    done(null, obj);  // invalidates the existing login session.
+});
 
 
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
+/**************************************
+ * Routing and Settings API
+ **************************************/
+app.use('/api', router);
+app.use('/gui', gui);
+router.get('/', basic_response.welcome);
+router.get('/admin', admin.find);
+router.get('/importAll',importer.import_collection);
+// took out ensureAuthenticated, from the add function. should go back in once production.
+router.get('/add', insert.insertById);
+router.get('/maps/?', maps.map_by_code);
+router.get('/maps/:id', maps.map_by_id);
+router.post('/upload',multipart(),insert.uploadCsv);
 
-    /**
-     *  Create the routing table entries + handlers for the application.
-     */
-    self.createRoutes = function() {
-        self.routes = { };
+/**************************************
+ * Routing and Settings GUI
+ **************************************/
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+gui.get('/?', gui_route.map_by_code);
+gui.get('/:id', gui_route.map_by_id);
 
-        self.routes['/asciimo'] = function(req, res) {
-            var link = "http://i.imgur.com/kmbjB.png";
-            res.send("<html><body><img src='" + link + "'></body></html>");
+/**************************************
+ * Routing for Login
+ **************************************/
+
+router.get('/login',
+    passport.authenticate('github'),
+    function(req, res) {
+        // The request will be redirected to GitHub for authentication, so this
+        // function will not be called.
+    });
+
+router.get('/github/callback',
+    passport.authenticate('github', { failureRedirect: '/api/pleaseLogin' }),
+    function(req, res) {
+        console.log(req);
+        res.redirect('/api/goodLogin');
+    });
+router.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect('/');
+});
+
+router.get('/goodLogin', function(req, res) {
+        res.json({success: 'successful login'});
+    }
+)
+router.get('/pleaseLogin', function(req, res)
+    {
+        loginMessage = {
+            error: 'please login',
+            login: 'http://localhost:3000/api/login'
         };
+        res.json(loginMessage);
+    }
+)
 
-        self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
-        };
-    };
+/***************************************
+ * Start server
+ * **************************************/
 
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
 
-    /**
-     *  Initialize the server (express) and create the routes and register
-     *  the handlers.
-     */
-    self.initializeServer = function() {
-        self.createRoutes();
-        self.app = express.createServer();
-
-        //  Add handlers for the app (from the routes).
-        for (var r in self.routes) {
-            self.app.get(r, self.routes[r]);
-        }
-    };
+app.listen(server_port, server_ip_address, function () {
+    console.log( "Listening on " + server_ip_address + ", server_port " + port )
+});
 
 
-    /**
-     *  Initializes the sample application.
-     */
-    self.initialize = function() {
-        self.setupVariables();
-        self.populateCache();
-        self.setupTerminationHandlers();
+function ensureAuthenticated(req, res, next) {
 
-        // Create the express server and routes.
-        self.initializeServer();
-    };
+    if (req.isAuthenticated()) {
+
+        next();
+    }
+    else {
 
 
-    /**
-     *  Start the server (starts up the sample application).
-     */
-    self.start = function() {
-        //  Start the app on the specific interface (and port).
-        self.app.listen(self.port, self.ipaddress, function() {
-            console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
-        });
-    };
+    res.redirect('/api/pleaseLogin');
 
-};   /*  Sample Application.  */
-
-
-
-/**
- *  main():  Main code.
- */
-var zapp = new SampleApp();
-zapp.initialize();
-zapp.start();
-
+    }
+}
