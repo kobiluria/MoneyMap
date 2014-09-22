@@ -7,6 +7,7 @@ var express = require('express'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
     admin = require('./routes/admin'),
+    importer = require('./static/importer'),
     insert = require('./routes/insert'),
     maps = require('./routes/maps'),
     gui_route = require('./routes/gui'),
@@ -70,6 +71,7 @@ app.use('/api', router);
 app.use('/gui', gui);
 router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
+router.get('/importAll',importer.import_collection);
 // took out ensureAuthenticated, from the add function. should go back in once production.
 router.get('/add', insert.insertById);
 router.get('/maps/?', maps.map_by_code);
@@ -123,9 +125,13 @@ router.get('/pleaseLogin', function(req, res)
 /***************************************
  * Start server
  * **************************************/
-app.listen(port);
-console.log('API is listening on port :' + port);
 
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+
+app.listen(server_port, server_ip_address, function () {
+    console.log( "Listening on " + server_ip_address + ", server_port " + port )
+});
 
 
 function ensureAuthenticated(req, res, next) {

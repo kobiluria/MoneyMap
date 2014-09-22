@@ -51,8 +51,17 @@ exports.build_doc = function(osm_entity, api_result, callback) {
  */
 exports.get_collection = function(name, callback) {
 
+    //provide a sensible default for local development
+    mongodb_url = '127.0.0.1';
+    mongodb_port = 27017;
+//take advantage of openshift env vars when available:
+    if(process.env.OPENSHIFT_MONGODB_DB_URL){
+        mongodb_url = process.env.OPENSHIFT_MONGODB_DB_URL;
+        mongodb_port = process.env.OPENSHIFT_MONGODB_DB_PORT;
+    }
+
     // Set up the connection to the local db
-    var mongoclient = new MongoClient(new Server('localhost', 27017),
+    var mongoclient = new MongoClient(new Server(mongodb_url, mongodb_port),
         {native_parser: true});
 
     mongoclient.open(function(err, mongoclient) {
@@ -98,7 +107,9 @@ exports.queryDoesntExists = function(item,callback) {
                      callback(null,item);
                  }
                  else {
-                     callback(new Error('Error - item found'),item);
+                     err = new Error('Error - item found');
+                     err.item = item;
+                     callback(err,item);
                  }
             });
     });
