@@ -51,36 +51,23 @@ exports.build_doc = function(osm_entity, api_result, callback) {
  */
 exports.get_collection = function(name, callback) {
 
-    //default for local development
-    mongodb_url = '127.0.0.1';
-    mongodb_port = 27017;
-
-//openshift env vars when available:
-    if(process.env.OPENSHIFT_MONGODB_DB_URL){
-        mongodb_url = process.env.OPENSHIFT_MONGODB_DB_URL;
-        mongodb_port = process.env.OPENSHIFT_MONGODB_DB_PORT;
+    // default to a 'localhost' configuration:
+    var connection_string = '127.0.0.1:27017/MoneyMap';
+// if OPENSHIFT env variables are present, use the available connection info:
+    if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
+        connection_string = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
+            process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
+            process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
+            process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
+            'MoneyMap';
     }
 
-    // Set up the NEW mongoclient!!
-    var mongoclient = new MongoClient(new Server(mongodb_url, mongodb_port),
-        {native_parser: true});
-
-    mongoclient.open(function(err, mongoclient) {
-        if(err){
-            throw err;
-            console.log(err);
-            return;
-        }
-        // Get the Money Map db
-        var db = mongoclient.db('MoneyMap');
-
-        if(process.env.OPENSHIFT_MONGODB_DB_USERNAME) { // we are on openshift
-            db.authenticate(process.env.env.OPENSHIFT_MONGODB_DB_USERNAME,
-                process.env.OPENSHIFT_MONGODB_DB_PASSWORD);
-        }
-
+    //load the Client interface
+// the client db connection scope is wrapped in a callback:
+    MongoClient.connect('mongodb://'+connection_string, function(err, db) {
+        if(err) throw err;
         db.collection(name, {} , function(err, collection) {
-            callback(err, collection, mongoclient); // give the callback function the right to close the connection.
+            callback(err, collection, MongoClient); // give the callback function the right to close the connection.
 
         });
     });
