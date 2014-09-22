@@ -14,7 +14,6 @@ var express = require('express'),
     passport = require('passport'),
     GitHubStrategy = require('passport-github').Strategy,
     session = require('express-session'),
-    //oauth = require('./static/oauth'),
     cookieParser = require('cookie-parser'),
     multipart = require('connect-multiparty'),
     basic_response = require('./routes/basic_response');
@@ -32,12 +31,11 @@ app.use(express.static(__dirname + '/public'));
 /**************************************
  * Passport session
  **************************************/
-/*
 passport.use(
 
     new GitHubStrategy({
-        clientID: oauth.GITHUB_CLIENT_ID,
-        clientSecret: oauth.GITHUB_CLIENT_SECRET,
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
         callbackURL: 'http://127.0.0.1:3000/api/github/callback'
     },
     function(accessToken, refreshToken, profile, done) {
@@ -64,7 +62,6 @@ passport.deserializeUser(function(obj, done) {
     done(null, obj);  // invalidates the existing login session.
 });
 
-*/
 
 /**************************************
  * Routing and Settings API
@@ -91,7 +88,7 @@ gui.get('/:id', gui_route.map_by_id);
 /**************************************
  * Routing for Login
  **************************************/
-/*
+
 router.get('/login',
     passport.authenticate('github'),
     function(req, res) {
@@ -122,13 +119,13 @@ router.get('/pleaseLogin', function(req, res)
         };
         res.json(loginMessage);
     }
-)*/
+)
 
 /***************************************
  * Start server
  * **************************************/
 
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 3000;
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
 
 app.listen(server_port, server_ip_address, function () {

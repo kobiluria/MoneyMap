@@ -54,16 +54,17 @@ exports.find = function(req, res) {
  */
 find_missing = function(search_str, callback) {
 
-    tools.get_collection('entities_new', function(err, collection, mongoclient) {
+    tools.get_collection('entities', function(err, collection, mongoclient) {
         unirest.get(tools.OPEN_MUNI).end(function(api) {
             var results = api.body.results;
             var answer = [];
+
+
+            // loop through all of the results
             tools.loop_api(results, find_entity, send_missing);
             function find_entity(result, callback) {
                 var code = result['code'];
-                console.log(result['code']);
                 if(code == ' ' || code =='' || code == " " || code ==""){
-                    console.log('llalallalallallallal');
                     callback();
                     return;
                 }
@@ -87,6 +88,7 @@ find_missing = function(search_str, callback) {
                 });
             }
 
+            // once done the function will end the connection.
             function send_missing(err) { // when we are done.
                 callback(answer);
                 mongoclient.close();
@@ -102,7 +104,6 @@ find_missing = function(search_str, callback) {
  */
 aggregate = function(agg, callback) {
     agg.push({$project: {_id: 0, code: '$muni_code',name:'$name', id: '$omuni_id'}});
-    console.log(agg);
     tools.get_collection('entities', function(err, collection, mongoclient) {
         collection.aggregate(agg, function(err, result) {
             mongoclient.close();
