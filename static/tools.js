@@ -51,16 +51,17 @@ exports.build_doc = function(osm_entity, api_result, callback) {
  */
 exports.get_collection = function(name, callback) {
 
-    //provide a sensible default for local development
+    //default for local development
     mongodb_url = '127.0.0.1';
     mongodb_port = 27017;
-//take advantage of openshift env vars when available:
+
+//openshift env vars when available:
     if(process.env.OPENSHIFT_MONGODB_DB_URL){
         mongodb_url = process.env.OPENSHIFT_MONGODB_DB_URL;
         mongodb_port = process.env.OPENSHIFT_MONGODB_DB_PORT;
     }
 
-    // Set up the connection to the local db
+    // Set up the NEW mongoclient!!
     var mongoclient = new MongoClient(new Server(mongodb_url, mongodb_port),
         {native_parser: true});
 
@@ -68,8 +69,13 @@ exports.get_collection = function(name, callback) {
         // Get the Money Map db
         var db = mongoclient.db('MoneyMap');
 
+        if(process.env.OPENSHIFT_MONGODB_DB_USERNAME) { // we are on openshift
+            db.authenticate(process.env.env.OPENSHIFT_MONGODB_DB_USERNAME,
+                process.env.OPENSHIFT_MONGODB_DB_PASSWORD);
+        }
+
         db.collection(name, {} , function(err, collection) {
-            callback(err, collection, mongoclient);
+            callback(err, collection, mongoclient); // give the callback function the right to close the connection.
 
         });
     });
@@ -86,6 +92,7 @@ exports.queryExists = function(item,callback) {
         collection.find({'omuni_id': item.omuni_id},{sort: {date_updated: 1}})
             .toArray(function(err, results) {
                 callback(null,item[0]); // return the must updated one.
+                mongoclient.close(); // close the mongo client
 
         });
     });
