@@ -29,7 +29,6 @@ function export_map(agg,req,res) {
 
                 res.json(geojson);
 
-                mongoclient.close();
             });
     });
 }
