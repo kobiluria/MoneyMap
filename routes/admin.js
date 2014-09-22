@@ -38,7 +38,8 @@ exports.find = function(req, res) {
 
     }
     function resposne(result) {
-        res.json({request: req.query.q, result: result, count: result.length});
+        var missing_vals = {request: req.query.q, result: result, count: result.length};
+        res.json(missing_vals);
 
     }
 };
