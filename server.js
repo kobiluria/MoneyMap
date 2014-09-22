@@ -14,7 +14,6 @@ var express = require('express'),
     passport = require('passport'),
     GitHubStrategy = require('passport-github').Strategy,
     session = require('express-session'),
-    oauth = require('./static/oauth'),
     cookieParser = require('cookie-parser'),
     multipart = require('connect-multiparty'),
     basic_response = require('./routes/basic_response');
@@ -35,8 +34,8 @@ app.use(express.static(__dirname + '/public'));
 passport.use(
 
     new GitHubStrategy({
-        clientID: oauth.GITHUB_CLIENT_ID,
-        clientSecret: oauth.GITHUB_CLIENT_SECRET,
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
         callbackURL: 'http://127.0.0.1:3000/api/github/callback'
     },
     function(accessToken, refreshToken, profile, done) {
