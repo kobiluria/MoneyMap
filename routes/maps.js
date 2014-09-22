@@ -28,7 +28,6 @@ function export_map(agg,req,res) {
                 geojson['type'] = 'Feature';
 
                 res.json(geojson);
-
             });
     });
 }
