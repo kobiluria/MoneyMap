@@ -1,0 +1,16 @@
+extends layout
+block content
+    #map(style='height: 500px;')
+    script.
+        success = function(geojson){
+            var map = L.map("map").setView([31.783333, 35.216667], 9);
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution:
+                    '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+            L.geoJson(geojson).addTo(map);
+        }
+        $.ajax({
+            dataType: "json",
+            url: './api/maps/!{id}',
+        data: '',
+        success: success
+        });
