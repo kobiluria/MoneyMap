@@ -37,7 +37,8 @@
         "npm": "1.1.49"
 },
 "scripts": {
+    "start": "node server.js",
 "test": "make test"
-}
-
+},
+    "main": "server.js"
 }
