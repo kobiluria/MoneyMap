@@ -14,7 +14,7 @@ var Db = require('mongodb').Db,
  * This function should be called once in the intial build of the database
  *************************************************************************/
 exports.import_collection = function() {
-    tools.get_collection('entities', function(err, collection , mongoclient) {
+    tools.get_collection('entities_new', function(err, collection , mongoclient) {
         unirest.get(tools.OPEN_MUNI)
             .end(function proccess_api(api_results) {
                 var results = api_results.body.results;
@@ -23,7 +23,7 @@ exports.import_collection = function() {
                         return results.length ? true : false;
                     },function(callback) {
                         var result = results.shift();
-                        import_entity(callback, result);
+                        import_entity(callback, result,collection);
                     }
                     , function(err) {
                         tools.closeMongoClient(err, mongoclient);
@@ -38,11 +38,12 @@ exports.import_collection = function() {
  * when done.
  * @param {JSON} result the Open Muni Entity result to import from OSM
  *********************************************************************/
-import_entity = function(callback, result) {
+import_entity = function(callback, result, collection) {
     // if this is not a real entity.
     if (result['code'] == '') {
         callback();
     }
+    // otherwise :
     async.waterfall([
         function(callback) {setTimeout(callback, 2000)},
         function(callback) {callback(null, result)},
@@ -51,6 +52,7 @@ import_entity = function(callback, result) {
         osm_tools.get_correct_osm,
         tools.build_doc,
         function(result, callback) {
+
             collection.insert(result, function(err, mongo_result) {
                 callback(err, mongo_result);
             });

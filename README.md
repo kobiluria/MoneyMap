@@ -10,5 +10,5 @@
 
 #### Stack
 
-**MoneyMap** is based on Node.js, Express 4.0 , and uses Mongodb to store GeoJson Polygon
- objects.
+**MoneyMap** is based on Node.js, Express 4.0 , and uses MongoDB to store GeoJson Polygon 
+objects.

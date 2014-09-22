@@ -37,9 +37,6 @@ function insertDatabaseById(item, callback){
                 message.item = item;
                 callback(message);
             }
-            //TODO safe insert :  should only insert object where all fields are full.
-            //TODO build a standard for the output in cases of insert and update.
-            //TODO add a safe insert function in the tools library.
             else {
                 collection.insert(doc, function (err, result) {
                     console.log('inserted : ' + result[0].osm_name);

@@ -78,6 +78,10 @@ exports.call_reverse = function(api_result, query_str, callback) {
     console.log(tools.NOMINATIM_REVERSE + query_str);
     unirest.get(tools.NOMINATIM_REVERSE + query_str)
         .end(function(reverse_result) {
+            if(reverse_result.body.error){ // no city like this exists. somethings wrong.
+                callback(new Error(reverse_result.body.error));
+                return;
+            }
             var osm_query = {city: reverse_result.body.address.city,
                 country: reverse_result.body.address.country,
                 format: 'json',
@@ -118,13 +122,12 @@ exports.build_reverse = function(doc, callback) {
             encodeURIComponent(osm_query[key]);
     }).join('&');
 
-    console.log(query_str);
-    //FIXME this should be the open muni id -> its actually the open muni code!!
+
     console.log(tools.OPEN_MUNI + doc.omuni_id);
     unirest.get(tools.OPEN_MUNI + doc.omuni_id).end(function(results) {
         if (results) {
-            // for debug
-            console.log(results.body);
+
+
             callback(null, results.body, query_str);
 
         }
