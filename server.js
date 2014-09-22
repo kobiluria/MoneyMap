@@ -14,7 +14,7 @@ var express = require('express'),
     passport = require('passport'),
     GitHubStrategy = require('passport-github').Strategy,
     session = require('express-session'),
-    oauth = require('./static/oauth'),
+    //oauth = require('./static/oauth'),
     cookieParser = require('cookie-parser'),
     multipart = require('connect-multiparty'),
     basic_response = require('./routes/basic_response');
@@ -32,6 +32,7 @@ app.use(express.static(__dirname + '/public'));
 /**************************************
  * Passport session
  **************************************/
+/*
 passport.use(
 
     new GitHubStrategy({
@@ -63,6 +64,7 @@ passport.deserializeUser(function(obj, done) {
     done(null, obj);  // invalidates the existing login session.
 });
 
+*/
 
 /**************************************
  * Routing and Settings API
@@ -89,7 +91,7 @@ gui.get('/:id', gui_route.map_by_id);
 /**************************************
  * Routing for Login
  **************************************/
-
+/*
 router.get('/login',
     passport.authenticate('github'),
     function(req, res) {
@@ -120,7 +122,7 @@ router.get('/pleaseLogin', function(req, res)
         };
         res.json(loginMessage);
     }
-)
+)*/
 
 /***************************************
  * Start server
