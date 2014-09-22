@@ -66,6 +66,11 @@ exports.get_collection = function(name, callback) {
         {native_parser: true});
 
     mongoclient.open(function(err, mongoclient) {
+        if(err){
+            throw err;
+            console.log(err);
+            return;
+        }
         // Get the Money Map db
         var db = mongoclient.db('MoneyMap');
 
