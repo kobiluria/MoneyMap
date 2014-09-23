@@ -67,7 +67,7 @@ exports.get_collection = function(name, callback) {
     MongoClient.connect('mongodb://'+connection_string, function(err, db) {
         if(err) throw err;
         db.collection(name, {} , function(err, collection) {
-            callback(err, collection, MongoClient); // give the callback function the right to close the connection.
+            callback(err, collection, db); // give the callback function the right to close the connection.
 
         });
     });

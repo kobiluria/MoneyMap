@@ -57,7 +57,7 @@ exports.find = function(req, res) {
  */
 find_missing = function(search_str, callback) {
 
-    tools.get_collection('entities', function(err, collection, mongoclient) {
+    tools.get_collection('entities', function(err, collection, db) {
         unirest.get(tools.OPEN_MUNI).end(function(api) {
             var results = api.body.results;
             var answer = [];
@@ -94,6 +94,8 @@ find_missing = function(search_str, callback) {
             // once done the function will end the connection.
             function send_missing(err) { // when we are done.
                 callback(answer);
+                db.close();
+
 
             }
         });
