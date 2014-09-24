@@ -24,7 +24,7 @@ exports.findAll = function(req, res) {
                     'osm_name': '$osm_name',
                     'url': {$concat: [tools.API_HEAD_ENDPOINT,'entities/', '$omuni_id'] },
                 'map_url': {$concat: [tools.API_HEAD_ENDPOINT,'maps/', '$omuni_id'] },
-                'map_gui_url':{$concat: [tools.API_HEAD_ENDPOINT,'maps/', '$omuni_id'] }}}
+                'map_gui_url':{$concat: [tools.GUI_HEAD_ENDPOINT,'maps/', '$omuni_id'] }}}
             ],
             function (err, result) {
                 if (err) {
