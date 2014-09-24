@@ -85,8 +85,8 @@ router.post('/upload',multipart(),insert.uploadCsv);
  **************************************/
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-gui.get('/?', gui_route.map_by_code);
-gui.get('/:id', gui_route.map_by_id);
+gui.get('/maps/?', gui_route.map_by_code);
+gui.get('/maps/:id', gui_route.map_by_id);
 
 /**************************************
  * Routing for Login
