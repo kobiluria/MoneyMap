@@ -17,6 +17,9 @@ exports.NOMINATIM = 'http://nominatim.openstreetmap.org/search?';
 exports.NOMINATIM_REVERSE = 'http://nominatim.openstreetmap.org/reverse?';
 /*** @type {string}  The open muni project API EndPoint **/
 exports.OPEN_MUNI = 'http://ext.openmuni.org.il/v1/entities/';
+/*** @type {string}  The open muni project API EndPoint **/
+exports.API_HEAD_ENDPOINT = (process.env.OPENSHIFT_NODEJS_IP) ?
+    'http://api-moneymap.rhcloud.com/api/' :'http://localhost:3000/api/';
 
 
 

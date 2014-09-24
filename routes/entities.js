@@ -1,62 +1,32 @@
 
-
-
-var mongo = require('mongodb');
-
-var Server = mongo.Server,
-    Db = mongo.Db,
-    BSON = mongo.BSONPure;
-
-var server = new Server('localhost', 27017, {auto_reconnect: true});
-db = new Db('entitydb', server, {safe: true});
-
-db.open(function(err, db) {
-    if(!err) {
-        console.log("Connected to 'entitydb' database");
-        db.collection('entities', {safe:true}, function(err, collection) {
-            if (err) {
-                console.log("The 'entities' collection doesn't exist. Creating it with sample data...");
-            }
-        });
-    }
-});
+var tools = require('../static/tools.js')
 
 
 exports.findById = function(req, res) {
-    var id = req.params.id;	
+    var id = req.params.id;
     console.log('Retrieving entity: ' + id);
-    db.collection('entities', function(err, collection) {
-    	//TODO  need to redit this
-    item = collection.findOne({'code':parseInt(id)}, function(err, item) {
-        	if(!item){
-        		console.log("none");
-        	}
-        	console.log(item);
-            res.send(item);
-        });
-    });
-};
-
-exports.findAll = function(req, res) {
-    db.collection('entities', function(err, collection) {
-        collection.find().limit(5).toArray(function(err, items) {
-            res.send(items);
-        });
-    });
-};
-
-exports.addEntity = function(req, res) {
-    var entity = req.body;
-    console.log('Adding entity: ' + JSON.stringify(entity));
-    db.collection('entities', function(err, collection) {
-        collection.insert(entity, {safe:true}, function(err, result) {
-            if (err) {
-                res.send({'error':'An error has occurred'});
-            } else {
-                console.log('Success: ' + JSON.stringify(result[0]));
-                res.send(result[0]);
-            }
+    tools.get_collection('entities', function (err, collection, db) {
+        collection.findOne({'omuni_code': id}, function (err, doc) {
+            res.json(doc);
+            db.close();
         });
     });
 }
 
+exports.findAll = function(req, res) {
+    tools.get_collection('entities', function (err, collection, db) {
+        collection.aggregate(
+            [
+                {$project: {_id: 0, 'omuni_name': '$omuni_name',
+                    'osm_name': '$osm_name',
+                    'url': {$concat: [tools.API_HEAD_ENDPOINT,'entities/', '$omuni_id'] }}}
+            ],
+            function (err, result) {
+                if (err) {
+                    throw(err);
+                }
+                res.json(result);
+                db.close();
+            });
+    });
+};
