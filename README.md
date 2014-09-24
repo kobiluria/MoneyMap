@@ -12,3 +12,6 @@
 
 **MoneyMap** is based on Node.js, Express 4.0 , and uses MongoDB to store GeoJson Polygon 
 objects.
+
+#### Dev Server :
+http://api-moneymap.rhcloud.com/
