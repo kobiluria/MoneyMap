@@ -69,7 +69,7 @@ passport.deserializeUser(function(obj, done) {
  **************************************/
 app.use('/api', router);
 app.use('/gui', gui);
-app.get('/', function(req,res){ res.sendfile(__dirname + '/static/Intro.html');});
+app.get('/', function(req,res){ res.sendfile(__dirname + '/public/frontpage/index.html');});
 router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
 router.get('/importAll',importer.import_collection);

@@ -1,0 +1,7 @@
+site_name: MoneyMap
+site_auther: Kobi Luria
+repo_url: https://github.com/kobiluria/MoneyMap
+site_dir: ./public/frontpage/
+pages:
+- [index.md, Home]
+
