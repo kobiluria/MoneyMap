@@ -74,7 +74,7 @@ router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
 router.get('/importAll',importer.import_collection);
 // took out ensureAuthenticated, from the add function. should go back in once production.
-router.get('/add', insert.insertById);
+router.post('/add',ensureAuthenticated, insert.insertById);
 router.get('/entities',entities.findAll);
 router.get('/entities/:id',entities.findById);
 router.get('/maps/?', maps.map_by_code);
