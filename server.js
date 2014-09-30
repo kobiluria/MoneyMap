@@ -37,7 +37,7 @@ passport.use(
     new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID,
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        callbackURL: 'http://127.0.0.1:3000/api/github/callback'
+        callbackURL: 'http://api-moneymap.rhcloud.com/api/github/callback'
     },
     function(accessToken, refreshToken, profile, done) {
         // asynchronous verification, for effect...
@@ -74,7 +74,7 @@ router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
 router.get('/importAll',importer.import_collection);
 // took out ensureAuthenticated, from the add function. should go back in once production.
-router.post('/add',ensureAuthenticated, insert.insertById);
+router.post ('/add',ensureAuthenticated, insert.insertById);
 router.get('/entities',entities.findAll);
 router.get('/entities/:id',entities.findById);
 router.get('/maps/?', maps.map_by_code);
