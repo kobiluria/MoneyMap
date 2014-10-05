@@ -36,8 +36,8 @@ passport.use(
 
     new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        callbackURL: 'http://api-moneymap.rhcloud.com/api/github/callback'
+        clientSecret: process.env.GITHUB_CLIENT_SECRET
+        //callbackURL: 'http://api-moneymap.rhcloud.com/api/github/callback'
     },
     function(accessToken, refreshToken, profile, done) {
         // asynchronous verification, for effect...
