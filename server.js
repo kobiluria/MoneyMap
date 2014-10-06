@@ -17,6 +17,7 @@ var express = require('express'),
     session = require('express-session'),
     cookieParser = require('cookie-parser'),
     multipart = require('connect-multiparty'),
+    GitHubApi = require("github"),
     basic_response = require('./routes/basic_response');
 
 
@@ -28,6 +29,8 @@ var port = process.env.PORT || 3000;
 var router = express.Router();
 var gui = express.Router();
 app.use(express.static(__dirname + '/public'));
+var github = new GitHubApi({version: "3.0.0"});
+
 
 /**************************************
  * Passport session
@@ -63,6 +66,30 @@ passport.deserializeUser(function(obj, done) {
     done(null, obj);  // invalidates the existing login session.
 });
 
+function ensureAuthenticated(req, res, next) {
+
+    if (req.isAuthenticated()) {
+        console.log(req.user.username);
+        next();
+    }
+    else {
+        res.redirect('/api/pleaseLogin');
+    }
+}
+
+function ensureCollaborator(req, res, next) {
+    github.repos.getCollaborator({'user':'kobiluria',
+        'repo':'MoneyMap',
+        'collabuser':req.user.username
+    }, function(err, msg){ // the msg will be 204 for a collaborator 404 otherwise
+        if(msg.meta.status == '204 No Content'){
+            next();
+        }
+        else{
+            res.json({Error:'for this operation you need to be a collaborator'});
+        }
+    });
+}
 
 /**************************************
  * Routing and Settings API
@@ -73,13 +100,13 @@ app.get('/', function(req,res){ res.sendfile(__dirname + '/index.html');});
 router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
 router.get('/importAll',importer.import_collection);
-// took out ensureAuthenticated, from the add function. should go back in once production.
-router.post ('/add',ensureAuthenticated, insert.insertById);
 router.get('/entities',entities.findAll);
 router.get('/entities/:id',entities.findById);
 router.get('/maps/?', maps.map_by_code);
 router.get('/maps/:id', maps.map_by_id);
-router.post('/upload',multipart(),insert.uploadCsv);
+router.post('/upload',ensureAuthenticated,ensureCollaborator,multipart(),insert.uploadCsv);
+router.post ('/add',ensureAuthenticated,ensureCollaborator,insert.insertById);
+
 
 /**************************************
  * Routing and Settings GUI
@@ -103,7 +130,6 @@ router.get('/login',
 router.get('/github/callback',
     passport.authenticate('github', { failureRedirect: '/api/pleaseLogin' }),
     function(req, res) {
-        console.log(req);
         res.redirect('/api/goodLogin');
     });
 router.get('/logout', function(req, res) {
@@ -114,7 +140,7 @@ router.get('/logout', function(req, res) {
 router.get('/goodLogin', function(req, res) {
         res.json({success: 'successful login'});
     }
-)
+);
 router.get('/pleaseLogin', function(req, res)
     {
         loginMessage = {
@@ -123,7 +149,7 @@ router.get('/pleaseLogin', function(req, res)
         };
         res.json(loginMessage);
     }
-)
+);
 
 /***************************************
  * Start server
@@ -135,18 +161,3 @@ var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
 app.listen(server_port, server_ip_address, function () {
     console.log( "Listening on " + server_ip_address + ", server_port " + port )
 });
-
-
-function ensureAuthenticated(req, res, next) {
-
-    if (req.isAuthenticated()) {
-
-        next();
-    }
-    else {
-
-
-    res.redirect('/api/pleaseLogin');
-
-    }
-}

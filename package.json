@@ -29,7 +29,8 @@
         "ya-csv":"",
         "connect-multiparty":"",
         "chai":"",
-        "supertest":""
+        "supertest":"",
+        "github":""
 },
 
 "engines": {
