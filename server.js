@@ -10,6 +10,7 @@ var express = require('express'),
     importer = require('./static/importer'),
     insert = require('./routes/insert'),
     entities = require('./routes/entities'),
+    spatial = require('./routes/spatial'),
     maps = require('./routes/maps'),
     gui_route = require('./routes/gui'),
     passport = require('passport'),
@@ -17,7 +18,7 @@ var express = require('express'),
     session = require('express-session'),
     cookieParser = require('cookie-parser'),
     multipart = require('connect-multiparty'),
-    GitHubApi = require("github"),
+    GitHubApi = require('github'),
     basic_response = require('./routes/basic_response');
 
 
@@ -29,7 +30,7 @@ var port = process.env.PORT || 3000;
 var router = express.Router();
 var gui = express.Router();
 app.use(express.static(__dirname + '/public'));
-var github = new GitHubApi({version: "3.0.0"});
+var github = new GitHubApi({version: '3.0.0'});
 
 
 /**************************************
@@ -99,9 +100,10 @@ app.use('/gui', gui);
 app.get('/', function(req,res){ res.sendfile(__dirname + '/index.html');});
 router.get('/', basic_response.welcome);
 router.get('/admin', admin.find);
-router.get('/importAll',importer.import_collection);
-router.get('/entities',entities.findAll);
-router.get('/entities/:id',entities.findById);
+router.get('/importAll', importer.import_collection);
+router.get('/entities', entities.findAll);
+router.get('/entities/:id', entities.findById);
+router.get('/spatial/?', spatial.findByCoordinates);
 router.get('/maps/?', maps.map_by_code);
 router.get('/maps/:id', maps.map_by_id);
 router.post('/upload',ensureAuthenticated,ensureCollaborator,multipart(),insert.uploadCsv);
@@ -156,8 +158,8 @@ router.get('/pleaseLogin', function(req, res)
  * **************************************/
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 3000;
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
-app.listen(server_port, server_ip_address, function () {
-    console.log( "Listening on " + server_ip_address + ", server_port " + port )
+app.listen(server_port, server_ip_address, function() {
+    console.log( 'Listening on ' + server_ip_address + ", server_port " + server_port );
 });

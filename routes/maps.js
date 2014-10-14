@@ -5,14 +5,14 @@
 var tools = require('../static/tools.js')
 
 exports.map_by_id = function(req, res){
-    export_map({$match: {omuni_id: req.params.id}},req,res);
-}
+    export_map({$match: {omuni_id: req.params.id}}, req, res);
+};
 
 exports.map_by_code = function(req, res) {
-    export_map({$match: {muni_code: req.query.muni_code}},req,res);
+    export_map({$match: {muni_code: req.query. muni_code}}, res);
 
-}
-function export_map(agg,req,res) {
+};
+function export_map(agg, res) {
     tools.get_collection('entities', function(err, collection, mongoclient) {
         console.log(JSON.stringify(agg));
         collection.aggregate(

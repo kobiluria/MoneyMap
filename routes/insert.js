@@ -12,11 +12,11 @@ exports.insertById = function(req, res) {
     var osm_id = req.query.osm_id;
     var omuni_id = req.query.omuni_id;
     var item = {osm_id: osm_id, omuni_id: omuni_id };
-    insertDatabaseById(item,function(message) {
+    insertDatabaseById(item, function(message) {
         res.json(message);
-    })
+    });
 
-}
+};
 
 function insertDatabaseById(item, callback){
 
@@ -30,7 +30,7 @@ function insertDatabaseById(item, callback){
             osm_tools.get_correct_osm,
             tools.build_doc
         ], function(err, doc) {
-            if(err){
+            if (err) {
                 mongoclient.close();
                 var message = {};
                 message.ERROR = err;
@@ -38,7 +38,7 @@ function insertDatabaseById(item, callback){
                 callback(message);
             }
             else {
-                collection.insert(doc, function (err, result) {
+                collection.insert(doc, function(err, result) {
                     console.log('inserted : ' + result[0].osm_name);
                     mongoclient.close();
                     callback({item: result[0].osm_name});
@@ -46,9 +46,9 @@ function insertDatabaseById(item, callback){
             }
         });
     });
-};
+}
 
-exports.uploadCsv = function(req,res) {
+exports.uploadCsv = function(req, res) {
     var found = [];
     var error = [];
     var count = 0;
@@ -61,12 +61,12 @@ exports.uploadCsv = function(req,res) {
     });
     reader.addListener('data', function(data) {
             count++;
-            insertDatabaseById(data,function(message){
-                if(message.ERROR){
+            insertDatabaseById(data, function(message) {
+                if (message.ERROR) {
                     error.push(message.item);
                     count--;
                 }
-                else{
+                else {
                     found.push(message.item);
                     count--;
                 }
@@ -75,14 +75,14 @@ exports.uploadCsv = function(req,res) {
 
     reader.addListener('end', function(data) {
         async.whilst(
-           function () {
+           function() {
             return (count > 0);
-        }, function (callback) {
+        }, function(callback) {
             setTimeout(callback, 1000);
-        }, function (finsh) {
+        }, function(finsh) {
             res.json({inserted: found, error: error});
         });
     });
 
-}
+};
 
