@@ -16,11 +16,12 @@ var tools = require('../static/tools.js');
  */
 exports.findByCoordinates = function(req, res) {
     var limit = (req.params.limit ? parseInt(req.params.limit) : 5);
-    var lat = parseFloat(req.params.lat);
-    var lng = parseFloat(req.params.lng);
+    var lat = parseFloat(req.query.lat);
+    var lng = parseFloat(req.query.lng);
+
     tools.get_collection('entities', function(err, collection, db) {
         collection.aggregate(
-            [{$geoNear: { near: {type: 'Point', coordinates: [lat, lng]},
+            [{$geoNear: { near: {type: 'Point', coordinates: [lng,lat]},
                 num: limit, spherical: true, distanceField: 'dist.calculated'}},
                 {$project: {
                     '_id': 0,

@@ -1,4 +1,6 @@
 .openshift/
 dump/
 node_modules/
+.idea/
+local/
 
