@@ -15,7 +15,7 @@ var tools = require('../static/tools.js');
  * @param {Response} res the response to the client.
  */
 exports.findByCoordinates = function(req, res) {
-    var limit = (req.params.limit ? parseInt(req.params.limit) : 5);
+    var limit = (req.query.limit ? parseInt(req.query.limit) : 5);
     var lat = parseFloat(req.query.lat);
     var lng = parseFloat(req.query.lng);
 
