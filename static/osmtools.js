@@ -53,11 +53,11 @@ exports.get_correct_osm = function(osm_results, api_result, callback) {
         var err = {name: api_result.name};
         callback(err, null);
     }
-}
+};
 
 /*************************************************************************
  * Get all results from open street map given a string Query
-g * @param {string} query
+ * @param {string} query
  * @param {JSON} api_result
  * @param {Function} callback a callback function, the callback
  * should be in the form callback(err, osm_results, api_result)
@@ -78,7 +78,8 @@ exports.call_reverse = function(api_result, query_str, callback) {
     console.log(tools.NOMINATIM_REVERSE + query_str);
     unirest.get(tools.NOMINATIM_REVERSE + query_str)
         .end(function(reverse_result) {
-            if(reverse_result.body.error){ // no city like this exists. somethings wrong.
+            // no city like this exists. somethings wrong.
+            if (reverse_result.body.error) {
                 callback(new Error(reverse_result.body.error));
                 return;
             }

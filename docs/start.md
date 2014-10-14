@@ -44,4 +44,4 @@ functionaly will include:
 1. query by size of polygon;
 2. query by i.d.
 3. upload a CSV with a table of scores and obtain a MAP with a heatmap by cities
-scores. 
+scores.

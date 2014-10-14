@@ -5112,8 +5112,7 @@ ul#theme-list {
     page-break-after: avoid;
   }
 }
-</style></head><body bgcolor="#E6E6FA">
-
+</style></head><body>
 <h1 id="money-map-">Money Map </h1>
 <p><strong>MoneyMap</strong> is a REST API and GUI for presenting Polygon GeoJSON of cities. </p>
 <p><strong>MoneyMap</strong> is also a web API for querying budget data by geospatial data.</p>

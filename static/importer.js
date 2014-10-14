@@ -14,7 +14,7 @@ var Db = require('mongodb').Db,
  * This function should be called once in the intial build of the database
  *************************************************************************/
 exports.import_collection = function() {
-    tools.get_collection('entities_new', function(err, collection , mongoclient) {
+    tools.get_collection('entities_new', function(err, collection , db) {
         unirest.get(tools.OPEN_MUNI)
             .end(function proccess_api(api_results) {
                 var results = api_results.body.results;
@@ -26,7 +26,7 @@ exports.import_collection = function() {
                         import_entity(callback, result,collection);
                     }
                     , function(err) {
-                        tools.closeMongoClient(err, mongoclient);
+                        db.close();
                     });
             });
     });
@@ -71,7 +71,7 @@ import_entity = function(callback, result, collection) {
  * **********************************************************************/
 exports.update_collection = function() {
 
-    tools.get_collection('entities', function(err, collection, mongoclient) {
+    tools.get_collection('entities', function(err, collection, db) {
         // find all documents.
         collection.find({}).toArray(function(err, results) {
             async.whilst(
@@ -80,7 +80,7 @@ exports.update_collection = function() {
                     var item = results.shift();
                     update_item(callback, item);
                 },function(err) {
-                    tools.closeMongoClient(err, mongoclient);
+                    db.close();
                 }
             );
         });
