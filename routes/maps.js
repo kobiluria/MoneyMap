@@ -18,7 +18,19 @@ exports.map_by_query = function(req, res) {
 }
 
 exports.map_all = function(req,res){
-    export_map({$match:''},res,true);
+    tools.get_collection('entities', function(err, collection, db) {
+        collection.aggregate([{$project: {_id: 0,
+                    'geometry': '$geojson',
+                    'properties.code': '$muni_code',
+                    'type': {$concat: ['Feature', '']}
+                }}],
+            function(err, result) {
+                if (err) {console.log(err)}
+                var geojson = {type: 'FeatureCollection', features: result};
+                res.json(geojson);
+                db.close();
+            });
+    });
 }
 
 map_by_coordinates = function(req, res) {
@@ -30,7 +42,7 @@ map_by_coordinates = function(req, res) {
 
     export_map(agg,res);
 };
-function export_map(agg, res, all) {
+function export_map(agg, res) {
     tools.get_collection('entities', function(err, collection, db) {
         console.log(JSON.stringify(agg));
         collection.aggregate(
@@ -39,17 +51,16 @@ function export_map(agg, res, all) {
                 {   _id: 0,
                     'geometry': '$geojson',
                     'properties.code': '$muni_code',
-                    'type':{$concat:['Feature','']}//todo does this work?
+                    'type': {$concat: ['Feature', '']}
                 }}],
             function(err, result) {
                 if (err) {console.log(err)}
 
                 var geojson;
-                if (agg.$geoNear || all) {
+                if (agg.$geoNear) {
                     geojson = {type: 'FeatureCollection', features: result};
                 }
                 else {
-
                     geojson = result[0];
                 }
 
