@@ -12,22 +12,40 @@ exports.map_by_code = function(req, res) {
     export_map({$match: {muni_code: req.query.muni_code}},res);
 
 }
+exports.map_by_coordinates = function(req,res) {
+    var limit = (req.query.limit ? parseInt(req.query.limit) : 5);
+    var lat = parseFloat(req.query.lat);
+    var lng = parseFloat(req.query.lng);
+    var agg = {$geoNear: { near: {type: 'Point', coordinates: [lng,lat]},
+                num: limit, spherical: true, distanceField: 'dist.calculated'}};
+
+    export_map(agg,res);
+};
 function export_map(agg, res) {
-    tools.get_collection('entities', function(err, collection, mongoclient) {
+    tools.get_collection('entities', function(err, collection, db) {
         console.log(JSON.stringify(agg));
         collection.aggregate(
             [agg,
                 {$project:
-                {_id: 0,
+                {   _id: 0,
                     'geometry': '$geojson',
-                    'properties.code': '$muni_code' }}],
+                    'properties.code': '$muni_code',
+                    'type':{$concat:['Feature','']}//todo does this work?
+                }}],
             function(err, result) {
                 if (err) {console.log(err)}
-                var geojson = result[0];
 
-                geojson['type'] = 'Feature';
+                var geojson;
+                if (agg.$geoNear) {
+                    geojson = {type: 'FeatureCollection', features: result};
+                }
+                else {
+
+                    geojson = result[0];
+                }
 
                 res.json(geojson);
+                db.close();
             });
     });
 }

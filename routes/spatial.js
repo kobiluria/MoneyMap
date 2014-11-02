@@ -35,7 +35,7 @@ exports.findByCoordinates = function(req, res) {
             function(err, result) {
                 if (err) {
                     throw (err);
-                }
+                }//TODO add a spatial map gui url.
                 res.json(result);
                 db.close();
             });
