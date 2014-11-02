@@ -104,9 +104,8 @@ router.get('/importAll', importer.import_collection);
 router.get('/entities', entities.findAll);
 router.get('/entities/:id', entities.findById);
 router.get('/spatial/?', spatial.findByCoordinates);
-router.get('/maps/?', maps.map_by_code);
+router.get('/maps/?', maps.map_by_query);
 router.get('/maps/:id', maps.map_by_id);
-router.get('/maps/spatial/?', maps.map_by_coordinates);
 router.post('/upload',ensureAuthenticated,ensureCollaborator,multipart(),insert.uploadCsv);
 router.post ('/add',ensureAuthenticated,ensureCollaborator,insert.insertById);
 
@@ -116,9 +115,8 @@ router.post ('/add',ensureAuthenticated,ensureCollaborator,insert.insertById);
  **************************************/
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-gui.get('/maps/?', gui_route.map_by_code);
+gui.get('/maps/?', gui_route.map_by_query);
 gui.get('/maps/:id', gui_route.map_by_id);
-gui.get('/maps/spatial/?', gui_route.map_by_coordinates);
 
 /**************************************
  * Routing for Login

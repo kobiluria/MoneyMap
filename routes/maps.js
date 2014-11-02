@@ -8,15 +8,20 @@ exports.map_by_id = function(req, res){
     export_map({$match: {omuni_id: req.params.id}},res);
 }
 
-exports.map_by_code = function(req, res) {
-    export_map({$match: {muni_code: req.query.muni_code}},res);
-
+exports.map_by_query = function(req, res) {
+    if (req.query.muni_code){
+        export_map({$match: {muni_code: req.query.muni_code}},res);
+    }
+    else if (req.query.spatial) {
+        map_by_coordinates(req, res);
+    }
 }
-exports.map_by_coordinates = function(req,res) {
+
+map_by_coordinates = function(req, res) {
     var limit = (req.query.limit ? parseInt(req.query.limit) : 5);
     var lat = parseFloat(req.query.lat);
     var lng = parseFloat(req.query.lng);
-    var agg = {$geoNear: { near: {type: 'Point', coordinates: [lng,lat]},
+    var agg = {$geoNear: { near: {type: 'Point', coordinates: [lng, lat]},
                 num: limit, spherical: true, distanceField: 'dist.calculated'}};
 
     export_map(agg,res);
