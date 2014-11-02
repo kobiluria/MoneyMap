@@ -84,6 +84,10 @@
         
             <li><a href="#api-endpoints">API-ENDPOINTS</a></li>
         
+            <li><a href="#gui-endpoints">GUI-ENDPOINTS</a></li>
+        
+            <li><a href="#api-endpoints-for-collaborators">API-ENDPOINTS For Collaborators</a></li>
+        
             <li><a href="#tech">Tech</a></li>
         
             <li><a href="#license">License</a></li>
@@ -107,10 +111,72 @@
 <p>Very Alpha 1.0</p>
 <hr />
 <h2 id="api-endpoints">API-ENDPOINTS</h2>
-<p><a href="http://api-moneymap.rhcloud.com/api">API-HEAD</a> : http://api-moneymap.rhcloud.com/api</p>
-<p><a href="http://api-moneymap.rhcloud.com/api/entities">Enitities</a> : http://api-moneymap.rhcloud.com/api/entities</p>
-<p><a href="http://api-moneymap.rhcloud.com/api/maps">MAPS</a> : http://api-moneymap.rhcloud.com/api/maps</p>
+<h3 id="api-head">API-Head :</h3>
+<p>The head of this API</p>
+<p><a href="http://api-moneymap.rhcloud.com/api">API-Head</a>. <code>GET http://api-moneymap.rhcloud.com/api</code></p>
+<h3 id="api-entities">API-Entities</h3>
+<p>The Entities / Cities EndPoint.</p>
+<p>This API Endpoint will return all
+entities in the system with relevent URL's.</p>
+<p><a href="http://api-moneymap.rhcloud.com/api/entities">Entities</a> : <code>GET http://api-moneymap.rhcloud.com/api/entities</code></p>
+<h3 id="api-maps">API-Maps</h3>
+<p>All queries from this endpoint will get a GeoJSon response which could be used in any Map Client.
+<a href="http://api-moneymap.rhcloud.com/api/maps/&lt;Options&gt;">MAPS</a> : <code>GET http://api-moneymap.rhcloud.com/api/maps</code></p>
+<h4 id="list-of-options-for-maps-endpoint">List of Options for maps endpoint:</h4>
+<ol>
+<li>
+<p><em>Query by Id</em> - Query using a Open Muni ID, use the Open Muni API to get a id you want to map 
+ <code>GET http://api-moneymap.rhcloud.com/api/maps/:id</code></p>
+</li>
+<li>
+<p><em>Query by muni code</em> - Query using an Offical muni-code.<code>muni_code</code> <code>GET http://api-moneymap.rhcloud.com/api/maps/?muni_code=&lt;muni_code&gt;</code></p>
+</li>
+<li>
+<p><em>Query by lat lng coordinates</em> - Get the nearst cities to a geo point. you need a
+<code>lat</code> and <code>lng</code> info plus please provide a limit <code>limit</code> to the query.
+currently a limit of 5 object will be returned in the max scenario
+ <code>GET http://api-moneymap.rhcloud
+ .com/api/maps/?spatial=true&amp;lat=&lt;lat&gt;&amp;lng=&lt;lng&gt;&amp;limit=&lt;limit&gt;</code></p>
+</li>
+</ol>
+<h3 id="api-spatial">API-Spatial</h3>
+<p>Get info and distance of current city from a <code>lat</code> <code>lng</code> point. This Query will
+return a list of entities and their distance from the point.
+<code>GET http://api-moneymap.rhcloud.com/api/spatial/?lat=&lt;lat&gt;&amp;lng=&lt;lng&gt;</code></p>
 <hr />
+<h2 id="gui-endpoints">GUI-ENDPOINTS</h2>
+<p>All GUI results will be presented using Leflet.js Map client.</p>
+<p><a href="http://api-moneymap.rhcloud.com/gui/maps/&lt;Options&gt;">GUI</a> : <code>http://api-moneymap.rhcloud.com/gui/maps/</code></p>
+<h3 id="list-of-options">List of Options:</h3>
+<p><em>Gui by Id</em> - Query using a Open Muni ID, use the Open Muni API to get a id you want to
+ map
+ <code>http://api-moneymap.rhcloud.com/gui/maps/:id</code></p>
+<p><em>Gui by lat lng coordinates</em> - Get the nearst cities to a geo point. you need a
+<code>lat</code> and <code>lng</code> info plus please provide a limit <code>limit</code> to the query.
+currently a limit of 5 object will be returned in the max scenario
+ <code>http://api-moneymap.rhcloud
+ .com/gui/maps/?spatial=true&amp;lat=&lt;lat&gt;&amp;lng=&lt;lng&gt;&amp;limit=&lt;limit&gt;</code></p>
+<hr />
+<h2 id="api-endpoints-for-collaborators">API-ENDPOINTS For Collaborators</h2>
+<p>(<em>Note you need to sign in Github and be a Collaborator</em>)</p>
+<p>Auth is done to limit the overhead of the openshift server and keep maintenance clean
+and sensible. This operation uses passport.js and Github Auth2.0.
+use Login before you query</p>
+<h3 id="api-login">API-Login</h3>
+<p>Hit this url before you use the other ones.</p>
+<p><a href="http://api-moneymap.rhcloud.com/api/login">API-Login</a> : <code>GET http://api-moneymap.rhcloud.com/api/login</code></p>
+<h3 id="api-mapall">API-mapAll</h3>
+<p>get a GeoJSON for all the enitites in the system. note that you will get
+back about 6MB.</p>
+<p>[API-mapAll] (http://api-moneymap.rhcloud.com/api/mapAll) : <code>GET http://api-moneymap.rhcloud.com/api/mapAll</code></p>
+<h3 id="api-add">API-add</h3>
+<p>add a enitity by supplying a <code>omuni_id</code> the id used in the Open Muni API and a <code>osm_id</code> a corresponding id from Open Street Map. Note that this is a <code>POST</code> Operation.</p>
+<p><a href="http://api-moneymap.rhcloud.com/api/add">API-add</a> : <code>POST
+http://api-moneymap.rhcloud.com/api/add</code></p>
+<h3 id="api-upload">API-upload</h3>
+<p>add a list of entities by supplying a csv file. one column
+of<code>omuni_id</code>  the id used in the Open Muni API and a <code>osm_id</code> a corresponding id from Open Street Map in the in the other column . Note that this is a <code>POST</code> operation.
+<code>POST http://api-moneymap.rhcloud.com/api/upload</code></p>
 <h2 id="tech">Tech</h2>
 <p>MoneyMap uses a number of open source projects to work properly:</p>
 <p><a href="http://nodejs.org">node.js</a> - evented I/O for the backend.</p>
