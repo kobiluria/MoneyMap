@@ -105,6 +105,7 @@ router.get('/entities', entities.findAll);
 router.get('/entities/:id', entities.findById);
 router.get('/spatial/?', spatial.findByCoordinates);
 router.get('/maps/?', maps.map_by_query);
+router.get('/mapAll', ensureAuthenticated, ensureCollaborator, maps.map_all);
 router.get('/maps/:id', maps.map_by_id);
 router.post('/upload',ensureAuthenticated,ensureCollaborator,multipart(),insert.uploadCsv);
 router.post ('/add',ensureAuthenticated,ensureCollaborator,insert.insertById);

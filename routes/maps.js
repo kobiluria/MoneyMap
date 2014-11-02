@@ -17,6 +17,10 @@ exports.map_by_query = function(req, res) {
     }
 }
 
+exports.map_all = function(req,res){
+    export_map({$match:''},res,true);
+}
+
 map_by_coordinates = function(req, res) {
     var limit = (req.query.limit ? parseInt(req.query.limit) : 5);
     var lat = parseFloat(req.query.lat);
@@ -26,7 +30,7 @@ map_by_coordinates = function(req, res) {
 
     export_map(agg,res);
 };
-function export_map(agg, res) {
+function export_map(agg, res, all) {
     tools.get_collection('entities', function(err, collection, db) {
         console.log(JSON.stringify(agg));
         collection.aggregate(
@@ -41,7 +45,7 @@ function export_map(agg, res) {
                 if (err) {console.log(err)}
 
                 var geojson;
-                if (agg.$geoNear) {
+                if (agg.$geoNear || all) {
                     geojson = {type: 'FeatureCollection', features: result};
                 }
                 else {
